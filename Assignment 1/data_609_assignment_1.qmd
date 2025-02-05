@@ -45,6 +45,7 @@ where the vector $\mathbf{v} = \begin{bmatrix} x & y\end{bmatrix}^T$ and $k$ is 
 ```{python}
 # load dependencies
 import cvxpy as cp
+import numpy as np
 
 # set variable
 x = cp.Variable(pos=True)
