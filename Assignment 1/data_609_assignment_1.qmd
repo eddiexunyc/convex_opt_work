@@ -9,7 +9,6 @@ format: html
 editor: source
 ---
 
-
 ## Instructions
 
 Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file,
@@ -30,6 +29,7 @@ Find the single critical point of this function and show that it is a local mini
 $$
 f(x,y) = x^2 + by^2
 $$
+
 Here we will look at two different values of $b$, $b=3$ and $b=10$. The global minimum of this function occurs at the point $x^* = 0$, $y^*=0$ no matter what the value of $b$. 
 Suppose that we didn't know this and wanted to find the minimum of this function using gradient descent instead of direct calculation.
 
@@ -42,26 +42,42 @@ where the vector $\mathbf{v} = \begin{bmatrix} x & y\end{bmatrix}^T$ and $k$ is 
 
 - Then test the performance of your algorithm as a function of the learning rates $k$ by performing 100 iterations of the algorithm for 100 values of $k$ equally spaced between $k=0.01$ and $k=0.3$. Start with an initial guess of $\mathbf{v}_0 = \begin{bmatrix} b & 1\end{bmatrix}^T$. Do this for $b=3$ and $b=10$. Make separate plots for $b=3$ and $b=10$ of the log base 10 of the error (in this case it is $\sqrt{x_{100}^2+y_{100}^2}$) for the final value of the iteration versus the value of $k$. How does learning rate relate to the final value of the error? For which value of $b$ does the algorithm have the ability to converge fastest (have the lowest value of the error at the end)?
 
+Problem 1 Solution
+
 ```{python}
 # load dependencies
-import cvxpy as cp
+import sympy as sp
+from scipy.optimize import minimize
 import numpy as np
+import matplotlib.pyplot as plt
 
-# set variable
-x = cp.Variable(pos=True)
-y = cp.Variable(pos=True)
+## Part A 
+# define the function
+x, y = sp.symbols('x y')
+formula = (x-1)**2 + (y+2)**2
 
-a = cp.Parameter(pos=True)
-b = cp.Parameter(pos=True)
-c = cp.Parameter()
+# find the critical point for the function
+df_x = sp.diff(formula, x)
+critical_point_x = sp.solve(df_x, x)
 
-objective_fn = (x * y) 
-objective = cp.Minimize(objective_fn)
-constraints = [(x-1)^2 + (y+2)^2]
-problem = cp.Problem(objective, constraints)
+df_y = sp.diff(formula, y)
+critical_point_y = sp.solve(df_y, y)
 
-problem.is_dgp(dpp=True)
+print(f'The critical point of x: {critical_point_x} and y: {critical_point_y}')
 
+# find the local minimum 
+df_dx = sp.diff(df_x, x)
+critical_point_x2 = df_dx.subs(x, critical_point_x[0])
+print(f'{critical_point_x2} is positive and it is the local minimum')
+
+## Part B
+# define the gradient descent algorithm
+def gradient_descent(gradient, start, learn_rate, n_iter):
+    vector = start
+    for _ in range(n_iter):
+        diff = -learn_rate * gradient(vector)
+        vector += diff
+    return vector
 
 ```
 
@@ -77,7 +93,6 @@ Gradient descent performs worse and worse the larger the condition number (and l
 
 
 ## Problem 2: Solving Least Squares Problems
-
 
 Generate a random $20\times 10$ matrix $A$ and a random 20-vector $b$ (use a Gaussian distribution).
 Then, solve the least squares problem:
@@ -105,7 +120,40 @@ $$
 the residuals $A\mathbf{x}-\mathbf{b}$ are orthogonal to the vector
 $A\mathbf{x}$
 
+Problem 2 Solution
 
+```{python}
+# load dependencies
+import numpy as np
+
+## Part A
+# define the matrix
+a = np.random.randn(20, 10)
+b = np.random.randn(20)
+
+# multiply b by the Morse-Penrose Pseudoinverse a
+x_normal = b @ np.linalg.pinv(a.T)
+print('This is the normal solution.')
+print(x_normal)
+
+## Part B
+# need to transpose a to get the least squares problem to work
+x_lstsq = np.linalg.lstsq(a, b)[0]
+print('This is the least squares problem solution.')
+print(x_lstsq)
+
+## Part C
+# compute QR factorization of a
+x_q, x_r = np.linalg.qr(a)
+
+# compute tranpose of x_q and b
+result_multiply_q = np.dot(x_q.T, b)
+
+# solve the equation
+x_qr = np.linalg.solve(x_r, result_multiply_q)
+print('This is the QR factorization solution.')
+print(x_qr)
+```
 
 ## Problem 3: Iterative Solutions to Least Squares
 
@@ -139,9 +187,12 @@ $$
 \mathbf{x} = \mathbf{x} - \mu A^T\left(A\mathbf{x}-\mathbf{b}\right)
 $$
 
-
-
 (b) Generate a random 20 × 10 matrix $A$ and 20-vector $\mathbf{b}$, and compute the least squares solution $\mathbf{x} = A^+\mathbf{b}$.
 Then run the Richardson algorithm with $\mu = \frac{1}{\|A\|^2}$ for
 500 iterations, and plot $\|\mathbf{x}^{(k)}-\mathbf{x}\|$ to verify
 that $\mathbf{x}^{(k)}$ is converging to $\mathbf{x}$
+
+Problem 3 Solution
+
+```{python}
+```
