@@ -1,12 +1,7 @@
 ---
-title: "Untitled"
-format: html
----
-
----
-title: "Homework 1: Introduction to Optimization and Least Squares"
-format: html 
-editor: source
+title: "DATA 609 - Homework 1: Introduction to Optimization and Least Squares"
+author: Eddie Xu
+format: pdf
 ---
 
 ## Instructions
@@ -47,7 +42,6 @@ Problem 1 Solution
 ```{python}
 # load dependencies
 import sympy as sp
-from scipy.optimize import minimize
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -71,14 +65,77 @@ critical_point_x2 = df_dx.subs(x, critical_point_x[0])
 print(f'{critical_point_x2} is positive and it is the local minimum')
 
 ## Part B
-# define the gradient descent algorithm
-def gradient_descent(gradient, start, learn_rate, n_iter):
-    vector = start
-    for _ in range(n_iter):
-        diff = -learn_rate * gradient(vector)
-        vector += diff
+# load dependencies
+import matplotlib.pyplot as plt
+
+# define the part b function
+def f(x, y, b):
+    return x**2 + (b*(y**2))
+
+# define the derivative of f(x, y) = x^2 + by^2 is d/dx = 2x and d/dy = 2by
+def df_dx(x):
+    return 2 * x
+
+def df_dy(b, y):
+    return 2 * b * y
+
+# define the gradient descent function
+def gradient_descent(start_x, start_y, b, k, iterations):
+
+    # initialize the parameter
+    x = start_x
+    y = start_y
+    vector = np.array([x, y])
+    grad_array = []
+
+    # run the gradient descent
+    for x in range(iterations):
+        # calculate the gradients
+        gradient_x = df_dx(x)
+        gradient_y = df_dy(b, y)
+        grad_array = np.array([gradient_x, gradient_y])
+        
+        # update the parameter
+        vector = vector - k * grad_array
+        
     return vector
 
+# define the error computation function
+def compute_error(vector):
+    return np.linalg.norm(vector)
+
+# set the parameters
+iterations = 100
+k_values = np.linspace(0.01, 0.3, 100)
+b_values = [3, 10]
+
+# plot the result
+fig, ax = plt.subplots(2, 1, figsize=(10, 10))
+
+# test for b (3, 10)
+for a, b in enumerate(b_values):
+    errors = []
+
+    for k in k_values:
+        start_x = b
+        start_y = 1
+
+        # run gradient descent
+        v_final = gradient_descent(start_x, start_y, b, k, iterations)
+
+        # compute the error
+        error = compute_error(v_final)
+
+        # store the error with the log base of 10
+        errors.append(np.log10(error))
+    
+    # plot
+    ax[a].plot(k_values, errors)
+    ax[a].set_title(f'Learning Rate vs Error for b={b}')
+
+# show plots
+plt.tight_layout()
+plt.show()
 ```
 
 Note: For some combinations of $k$ and $b$, the algorithm won't converge to the right answer, i.e. the error will grow with time. To make your plot easier to read, don't plot the error for iterations that didn't converge. 
@@ -157,14 +214,10 @@ print(x_qr)
 
 ## Problem 3: Iterative Solutions to Least Squares
 
-Although the pseudoinverse provides an exact formula for the least
-squares solutions, there are some situations in which using the exact
-solution is computationally difficult, particularly when the matrix $A$ 
+Although the pseudoinverse provides an exact formula for the least squares solutions, there are some situations in which using the exact solution is computationally difficult, particularly when the matrix $A$ 
 and vector $\mathbf{b}$ have a large number of entries. In this case,
 $AA^T$, which is an $m\times m$ matrix if $A$ is $m\times n$, may require an enormous amount of memory. In these cases it may be better to use an
-approximate solution instead of the exact formula. There are many
-different approximate methods for solving least squares problems, 
-here we will use an iterative method developed by Richardson.
+approximate solution instead of the exact formula. There are many different approximate methods for solving least squares problems,  here we will use an iterative method developed by Richardson.
 
 This method begins with an initial guess $\mathbf{x}^{(0)} = 0$ 
 and calculates successive approximations as follows:
@@ -173,7 +226,7 @@ $$
     \mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} - \mu A^T\left(A\mathbf{x}^{(k)}-\mathbf{b}\right)
 $$
 
-Here $\mu$ is a positive paramter that has a similar interpretation to the learning rate for 
+Here $\mu$ is a positive parameter that has a similar interpretation to the learning rate for 
 gradient descent. A choice that guarantees convergence is $\mu \leq \frac{1}{\|A\|}$. The iteration is terminated when the change in the residual
 $\|A^T(Ax^{(k)} − b)\|$ after successive steps is below a user determined threshold, which indicates that the least squares optimality conditions are nearly satisfied.
 
@@ -194,5 +247,44 @@ that $\mathbf{x}^{(k)}$ is converging to $\mathbf{x}$
 
 Problem 3 Solution
 
+$$\text{Part A Solution}$$
+
+$$\text{substituting } x= A^+b \text{ to  } x = x - \mu A^T\left(A\mathbf{x}-\mathbf{b}\right) \\ A^+b = A^+b - \mu A^T (A(A^+b) - b)$$
+$$A^+b = A^+b - \mu A^T (AA^+b - b) = A^+b = A^+b - \mu A^T (b - b) = A^+b = A^+b - \mu A^T (0)$$
+$$A^+b - \mu A^T (0) = A^+b - 0 $$
+$$A^+b = A^+b$$
+
 ```{python}
+# load dependencies
+import numpy as np
+import matplotlib.pyplot as plt
+
+## Part B
+# define the matrix
+a = np.random.randn(20, 10)
+b = np.random.randn(20)
+
+# compute the least square problem
+x_lstsq2 = np.linalg.lstsq(a, b)[0]
+print('This is the least squares problem solution.')
+print(x_lstsq2)
+
+# define the parameter
+mu = 1 / np.linalg.norm(a)**2
+x_k = np.zeros(10)  
+iterations = 500  
+
+# store the convergence
+convergence = []
+
+# define the richardson algorithm
+for i in range(iterations):
+    x_k = x_k + mu * a.T.dot(b - a.dot(x_k))
+    convergence.append(np.linalg.norm(x_k - x_lstsq2))
+
+# plot
+plt.plot(convergence)
+plt.xlabel('Iteration of k')
+plt.title('Convergence of Richardson Algorithm')
+plt.show()
 ```
