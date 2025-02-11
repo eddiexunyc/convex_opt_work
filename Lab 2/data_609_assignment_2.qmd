@@ -26,12 +26,10 @@ A_{(t)} = \begin{bmatrix} \cdots\, \mathbf{a}_1^T\, \cdots \\
 $$
 
 
-
 which says that row $j$ of the matrix $A_{(t)}$ is the $j$th observation $\mathbf{a}_j^T$, and the $j$th entry of $\mathbf{b}_{(t)}$ is $b_j$.
 
 
-Here we assume that the vectors $\mathbf{a}$ each contain $n$ observations, so that $A_{(t)}$ is a $t\times n$ matrix and the vector
-$\mathbf{b}_{(t)}$ is a $t$-vector.
+Here we assume that the vectors $\mathbf{a}$ each contain $n$ observations, so that $A_{(t)}$ is a $t\times n$ matrix and the vector $\mathbf{b}_{(t)}$ is a $t$-vector.
 
 As long as $t>n$, i.e. the number of time observations is greater than the number of features/data points in each observation, we can fit a linear model predicting the target
 as a function of the features $\mathbf{a}$ by solving the following system of equations:
@@ -98,30 +96,35 @@ ridership. Use least squares optimization to fit an autoregressive time series m
 new feature $f(T)$ in the time series. How does the temperature dependence coefficient differ between this model and the one you fit in (a)? Does the accuracy of the model improve or get worse using the new feature?
 
 ```{python}
+# load dependencies
 import pandas as pd
 import numpy as np
+
+## Part A
+# read in data
+citi_bike_raw_link = 'https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/daily_citibike_trips.csv'
+citi_bike_data = pd.read_csv(citi_bike_raw_link)
+
+
 
 ```
 
 ## Problem 2: Weighted Least Squares
 
-The file [social-mobility.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/social_mobility.csv) contains data on the fraction of 
-individuals born in the years 1980-1982 to parents in the bottom 20\% of the income distribution who reach the top 20\% of the income distribution by the time they turn 30 in a large number of municipalities throughout the United States. The dataset also contains 
-additional variables that describe other socio-economic differences 
-between the cities in the dataset.
+The file [social-mobility.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/social_mobility.csv) contains data on the fraction of individuals born in the years 1980-1982 to parents in the bottom 20\% of the income distribution who reach the top 20\% of the income distribution by the time they turn 30 in a large number of municipalities throughout the United States. The dataset also contains additional variables that describe other socio-economic differences  between the cities in the dataset.
 
 (a) Make a scatter-plot of mobility versus population (use a log-scale for population). What do you notice about the variance of social mobility as a function of population? This is a common feature of nearly every dataset containing geographic regions with widely different populations.
 
-(b) Assume that the number of children born in families making below the 20th percentile of the income distribution in each city is linearly proportional to the city population. Write down a formula 
-for how the variance of each measurement of the social mobility should depend
-on the measured social mobility and the population. Hint: start with
-either the formula for the variance of binomial counts or look up the
-variance of a proportion derived from a binomial distribution. Don't
-worry about constant factors when deriving this formula.
+(b) Assume that the number of children born in families making below the 20th percentile of the income distribution in each city is linearly proportional to the city population. Write down a formula for how the variance of each measurement of the social mobility should depend on the measured social mobility and the population. Hint: start with either the formula for the variance of binomial counts or look up the variance of a proportion derived from a binomial distribution. Don't worry about constant factors when deriving this formula.
 
-(c) Use weighted least squares to calculate an estimate of how 
-social mobility depends on commute time and student-teacher ratio, using weights calculated based on the variance estimate derived in (b).
+(c) Use weighted least squares to calculate an estimate of how social mobility depends on commute time and student-teacher ratio, using weights calculated based on the variance estimate derived in (b).
 Compare the coefficients to those derived from ordinary least squares with no weights.
+
+```{python}
+# load dependencies
+
+```
+
 
 ## Problem 3: Markowitz Portfolio Optimization
 
@@ -142,9 +145,7 @@ $\Gamma$.
 
 __Hint__: Possible workflow if  working in python: convert your data to a wide format using `pandas`, extract the values into a `numpy ndarray`, and then use the function `np.cov`. 
 
-Then solve the following constrained least squares problem
-to calculate optimal portfolios achieving a fixed rate of return
-with minimum variance:
+Then solve the following constrained least squares problem to calculate optimal portfolios achieving a fixed rate of return with minimum variance:
 
 $$
 \begin{aligned}
@@ -160,8 +161,7 @@ Calculate optimal portfolios based on the 2020-2022 data for $r=1.05$, $r=1.10$,
 
 (b) Plot the cumulative value of each portfolio over time, assuming that an 
 initial investment is made at the start of the period and that there is no rebalancing of the portfolio, i.e. $r_{T} = \sum_{i=1}^n w_i\Pi_{t=1}^T r_{it}$, where $r_{it}$ is the return of asset $i$ on trading day $t$, (hint: `np.cumprod` allows you to efficiently calculate this quantity).
-Make the plot for both the 
-training and test sets of returns.
+Make the plot for both the training and test sets of returns.
 
 For each of the 3 portfolios also report:
 
@@ -204,6 +204,10 @@ For each portfolio, also report:
 Comment on how the different values of $\lambda$ changed the optimal
 portfolios and the difference between in-sample and out-of-sample return and variance.
 
+```{python}
+# load dependencies
+
+```
 
 ## Potential Projects Based on this Homework:
 
