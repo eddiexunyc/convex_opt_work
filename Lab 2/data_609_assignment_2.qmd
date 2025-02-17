@@ -102,10 +102,10 @@ import numpy as np
 
 ## Part A
 # read in data
-citi_bike_raw_link = 'https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/daily_citibike_trips.csv'
+citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
 citi_bike_data = pd.read_csv(citi_bike_raw_link)
 
-
+print(citi_bike_data)
 
 ```
 
