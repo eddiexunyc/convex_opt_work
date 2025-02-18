@@ -105,7 +105,12 @@ import numpy as np
 citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
 citi_bike_data = pd.read_csv(citi_bike_raw_link)
 
-print(citi_bike_data)
+# get temperatures and daily trips
+trips = citi_bike_data['daily_trips'].values
+temperature = citi_bike_data['TMAX'].values
+
+## Part B
+
 
 ```
 
@@ -122,6 +127,8 @@ Compare the coefficients to those derived from ordinary least squares with no we
 
 ```{python}
 # load dependencies
+import numpy as np
+import pandas as pd
 
 ```
 
@@ -206,6 +213,9 @@ portfolios and the difference between in-sample and out-of-sample return and var
 
 ```{python}
 # load dependencies
+import numpy as np
+import pandas as pd
+
 
 ```
 
