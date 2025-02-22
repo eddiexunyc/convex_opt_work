@@ -28,33 +28,31 @@ $$
 
 which says that row $j$ of the matrix $A_{(t)}$ is the $j$th observation $\mathbf{a}_j^T$, and the $j$th entry of $\mathbf{b}_{(t)}$ is $b_j$.
 
-
 Here we assume that the vectors $\mathbf{a}$ each contain $n$ observations, so that $A_{(t)}$ is a $t\times n$ matrix and the vector $\mathbf{b}_{(t)}$ is a $t$-vector.
 
-As long as $t>n$, i.e. the number of time observations is greater than the number of features/data points in each observation, we can fit a linear model predicting the target
-as a function of the features $\mathbf{a}$ by solving the following system of equations:
+As long as $t>n$, i.e. the number of time observations is greater than the number of features/data points in each observation, we can fit a linear model predicting the target as a function of the features $\mathbf{a}$ by solving the following system of equations:
 
 $$
 (A^T_{(t)}A_{(t)})\mathbf{x}_{(t)} = A_{(t)}^T\mathbf{b}_{(t)}
 $$
 
-As the length of the time series increases, the computational difficulty of solving this problem also increases. However, it is possible to re-use work done on the previous
-time step to avoid solving the full system at each step.
+As the length of the time series increases, the computational difficulty of solving this problem also increases. However, it is possible to re-use work done on the previous time step to avoid solving the full system at each step.
 
 This algorithm is based on the fact that the _Gram Matrix_ $A^T_{(t+1)}A_{(t+1)}$ can be calculated from the Gram matrix $A^T_{(t)}A_{(t)}$ from the previous time step.
 $$
 A^T_{(t+1)}A_{(t+1)} = A^T_{(t)}A_{(t)} + \mathbf{a}_{t+1}\mathbf{a}_{t+1}^T
 $$
-Similarly, the product $A^T_{(t+1)} \mathbf{b}_{(t+1)}$ can also be updated from the
-value on the previous time step:
+
+Similarly, the product $A^T_{(t+1)} \mathbf{b}_{(t+1)}$ can also be updated from thevalue on the previous time step:
+
 $$
 A^T_{(t+1)}\mathbf{b}_{(t+1)} = A^T_{(t)}\mathbf{b}_{(t)} + b_{t+1}\mathbf{a}_{t+1}
 $$
 
 We can write an efficient algorithm to compute the updated least squares solution as follows:
 
-- Step 1: Pick an initial time $t$ such that $A_{t}$ is square or tall so that the 
-least squares problem can be solved (i.e. wait for enough data to have built up before your start) and then calculate the Gram matrix and the product $A^T_{t} \mathbf{b}_t$
+- Step 1: Pick an initial time $t$ such that $A_{t}$ is square or tall so that the  least squares problem can be solved (i.e. wait for enough data to have built up before your start) and then calculate the Gram matrix and the product $A^T_{t} \mathbf{b}_t$
+
 $$
 G_{(t)} = A^T_{(t)}A_{(t)}, \quad \mathbf{h}_{(t)} = A^T_{t}\mathbf{b}_t
 $$
@@ -70,15 +68,17 @@ $G_{(t+1)}$ and $\mathbf{h}_{(t+1)}$:
 $$ G_{(t+1)} = G_{(t)} + \mathbf{a}_{t+1}\mathbf{a}^T_{t+1},\quad 
 \mathbf{h}_{(t+1)} = \mathbf{h}_{(t)} + b_{t+1}\mathbf{a}_{t+1}
 $$
+
 Then you can repeat Step 2 to find $\mathbf{x}_{t+1}$. This algorithm can be improved upon slightly using the Matrix Inversion Lemma/Woodbury Formula, which could be a topic for a project (see note at the end which mentions Kalman filters).
 
 (a) You are going to use this algorithm to make a linear, autoregressive model that predicts total day-ahead citibike trips from the daily high temperature and the number of daily citibike trips taken each of the past 7 days. The data is contained in the file [daily_citibike_trips.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/daily_citibike_trips.csv). 
 
-Specifically, for each time point $t>7$ , fit the following
-model as a least squares estimation problem:
+Specifically, for each time point $t>7$ , fit the following model as a least squares estimation problem:
+
 $$
 N_{trips,\tau} = \sum_{i=1}^7 C_i N_{trips,\tau-i} + C_T T,
 $$
+
 Here, each $N_{trips,\tau}$ stands for the number of citibike trips on the $t$th day of the time series, $T$ stands for the forecast high temperature in New York City that day, and the coefficients $C_i$ and $C_T$ are the decision variables. 
 
 Find the coefficients $C_{i,t}$ and $C_{T,t}$ that minimize the mean square errors on all the observed citibike trips prior to time $t$. Use the recursive least squares optimization outlined in the preamble to this problem to calculate the coefficients for each time point, and plot how they and the $R^2$ of the model change over time.
@@ -99,15 +99,70 @@ new feature $f(T)$ in the time series. How does the temperature dependence coeff
 # load dependencies
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 ## Part A
 # read in data
 citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
-citi_bike_data = pd.read_csv(citi_bike_raw_link)
+data = pd.read_csv(citi_bike_raw_link)
 
-# get temperatures and daily trips
-trips = citi_bike_data['daily_trips'].values
-temperature = citi_bike_data['TMAX'].values
+
+# Prepare the data for autoregressive modeling
+n = len(data)
+lags = 7  # We are using the past 7 days
+
+# Arrays to hold the coefficients and R^2 values
+coefficients = np.zeros((n-lags, lags + 1))  # Coefficients for each time point
+r_squared = np.zeros(n-lags)  # R^2 values for each time point
+
+# Initialize Gram matrix and vector
+G = np.eye(lags + 1)  # Initial Gram matrix (identity matrix)
+h = np.zeros(lags + 1)  # Initial vector
+
+# Recursive Least Squares calculation
+for t in range(lags, n):
+    # Build the design matrix A_t and target vector b_t for time t
+    A_t = np.zeros(lags + 1)
+    for i in range(lags):
+        A_t[i] = data['daily_trips'][t-i-1]  # Past trip data
+    A_t[lags] = data['TMAX'][t]  # Temperature data
+    
+    b_t = data['daily_trips'][t]  # The observed Citibike trip for the current day
+    
+    # Update the Gram matrix and vector
+    G = G + np.outer(A_t, A_t)
+    h = h + b_t * A_t
+    
+    # Solve for the coefficients
+    x_t = np.linalg.solve(G, h)
+    coefficients[t-lags] = x_t  # Store the coefficients
+    
+    # Calculate the predicted value and R^2
+    prediction = np.dot(A_t, x_t)
+    residual = b_t - prediction
+    ss_total = np.sum((data['daily_trips'][lags:] - np.mean(data['daily_trips'][lags:]))**2)
+    ss_residual = np.sum(residual**2)
+    r_squared[t-lags] = 1 - (ss_residual / ss_total)
+
+plt.figure(figsize=(10, 6))
+for i in range(lags):
+    plt.plot(range(lags, n), coefficients[:, i], label=f'$C_{i+1}$')
+plt.plot(range(lags, n), coefficients[:, -1], label='$C_T$', linestyle='dashed', color='black')
+plt.xlabel('Time (Days)')
+plt.ylabel('Coefficient Values')
+plt.legend()
+plt.title('Coefficients Over Time')
+plt.grid(True)
+plt.show()
+
+# Plot R^2 over time
+plt.figure(figsize=(10, 6))
+plt.plot(range(lags, n), r_squared, label='R^2')
+plt.xlabel('Time (Days)')
+plt.ylabel('R^2')
+plt.title('R^2 Over Time')
+plt.grid(True)
+plt.show()
 
 ## Part B
 
