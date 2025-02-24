@@ -38,6 +38,7 @@ $$
 As the length of the time series increases, the computational difficulty of solving this problem also increases. However, it is possible to re-use work done on the previous time step to avoid solving the full system at each step.
 
 This algorithm is based on the fact that the _Gram Matrix_ $A^T_{(t+1)}A_{(t+1)}$ can be calculated from the Gram matrix $A^T_{(t)}A_{(t)}$ from the previous time step.
+
 $$
 A^T_{(t+1)}A_{(t+1)} = A^T_{(t)}A_{(t)} + \mathbf{a}_{t+1}\mathbf{a}_{t+1}^T
 $$
@@ -63,11 +64,11 @@ G_{(t)}\mathbf{x}_{(t)} = \mathbf{h}_{(t+1)}
 $$
 
 - Step 3: When the next data points $\mathbf{a}_{t+1}$ and $b_{t+1}$, update
+
 $G_{(t+1)}$ and $\mathbf{h}_{(t+1)}$:
 
 $$ G_{(t+1)} = G_{(t)} + \mathbf{a}_{t+1}\mathbf{a}^T_{t+1},\quad 
-\mathbf{h}_{(t+1)} = \mathbf{h}_{(t)} + b_{t+1}\mathbf{a}_{t+1}
-$$
+\mathbf{h}_{(t+1)} = \mathbf{h}_{(t)} + b_{t+1}\mathbf{a}_{t+1}$$
 
 Then you can repeat Step 2 to find $\mathbf{x}_{t+1}$. This algorithm can be improved upon slightly using the Matrix Inversion Lemma/Woodbury Formula, which could be a topic for a project (see note at the end which mentions Kalman filters).
 
@@ -94,76 +95,67 @@ the potential for both high and low values of $T$ to the same impact on predicte
 
 Use least squares optimization to fit an autoregressive time series model, replacing $T$ with the value of your new feature $f(T)$ in the time series. How does the temperature dependence coefficient differ between this model and the one you fit in (a)? Does the accuracy of the model improve or get worse using the new feature?
 
-```{python}
-# load dependencies
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+```{r}
+# load libraries
+library(tidyverse)
+library(rstan)
 
-## Part A
+# load in data
+citi_bike_raw_link <- 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
+citi_data <- read_csv(citi_bike_raw_link)
 
-# read in data
-citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
-citi_data = pd.read_csv(citi_bike_raw_link)
-
-# get values and define variables
-trips = citi_data['daily_trips'].values
-temp = citi_data['TMAX'].values
-days = 7
-
-# set up gram matrix and vectors
-G = np.zeros((days + 1 , days + 1))
-h = np.zeros(days + 1)
-
-# define other variables for RLS
-coefficients, r_squared, predictions = [], [], []
+# define variables
+days <- 7
+trip_length <- nrow(citi_data)
+G <- matrix(0, nrow = days + 1, ncol = days + 1) # gram matrix
+h <- matrix(0, nrow = days + 1, ncol = 1) # initial vector
+coefficient_array <- matrix(0, nrow = trip_length - days, ncol = days + 1) 
 
 # perform the RLS
-for t in range(days, len(trips)):
-    a_t = np.concatenate([trips[t-days:t], [temp[t]]])  
-    b_t = trips[t]  
-    
-    # append the matrix and vector
-    G += np.outer(a_t, a_t)
-    h += b_t * a_t
-    
-    # solve for coefficients
-    x_t = np.linalg.solve(G, h)
-    coefficients.append(x_t)
-    
-    # solve for r_squared
-    predictions = np.dot(a_t, x_t)
-    residual = b_t - predictions
-    ss_total = np.sum((citi_data['daily_trips'][days:] - np.mean(citi_data['daily_trips'][days:]))**2)
-    ss_residual = np.sum(residual**2)
-    r_squared.append(1 - (ss_residual / ss_total))
+for (t in (days + 1):trip_length) {
+  a_t <- c(citi_data$daily_trips[t-1:t-days], citi_data$TMAX[t])
+  b_t <- citi_data$daily_trips[t]
 
-# save both coefficients and r squared in an arrory
-coefficients = np.array(coefficients)
-r_squared = np.array(r_squared)
+  # update gram matrix and vector
+  G <- t(a_t) %*% a_t
+  h <- h + b_t * a_t
+  
+  # solve for coefficient and update it
+  x_t <- solve(G, h)
+  coefficient_array[t - days, ] <- x_t
+}
 
-# plot results
-plt.figure(figsize=(12, 6))
-for i in range(days):
-    plt.plot(range(days, len(trips)), coefficients[:, i])
-plt.plot(range(days, len(trips)), coefficients[:, days])
-plt.xlabel('Time (days)')
-plt.ylabel('Coefficient Value')
-plt.title('Coefficients over Time')
-plt.show()
+# get temperature coefficients
+temperature_coefficients <- coefficient_array[, days + 1]
 
-plt.figure(figsize=(12, 6))
-plt.plot(range(days, len(trips)), r_squared, label='R^2')
-plt.xlabel('Time (days)')
-plt.ylabel('R^2')
-plt.title('R^2 over Time')
-plt.show()
+# plot
+ggplot(data = data.frame(time = (days + 1):n, C_T = temperature_coefficients), aes(x = time, y = C_T)) +
+  geom_line() +
+  labs(title = "Change in Temperature Coefficient over Time",
+       x = "Time", y = "Temperature Coefficient") +
+  theme_minimal()
 
-## Part B
+# calculate r squared
+r_squared_value <- numeric(n - days)
 
+for (t in (days + 1):trip_length) {
+  a_t <- (citi_data$daily_trips[t-1:t-7], citi_data$high_temperature[t])
+  prediction <- sum(coefficient_array[t - days, ] * a_t)
+  actual <- citi_data$daily_trips[t]
+  residual <- actual - prediction
+  tss <- sum((citi_data$daily_trips[(days + 1):t] - mean(citi_data$daily_trips[(days + 1):t]))^2)
+  rss <- sum(residual^2)
+  r_squared_value[t - days] <- 1 - rss / tss
+}
 
-
+# plot
+ggplot(data = data.frame(time = (days + 1):n, R_squared = r_squared_value), aes(x = time, y = R_squared)) +
+  geom_line() +
+  labs(title = "Change in R-squared over Time",
+       x = "Time", y = "R-squared") +
+  theme_minimal()
 ```
+
 
 
 ## Problem 2: Weighted Least Squares
