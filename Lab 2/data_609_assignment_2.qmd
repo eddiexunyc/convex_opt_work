@@ -138,7 +138,7 @@ for t in range(days, len(trips)):
     ss_residual = np.sum(residual**2)
     r_squared.append(1 - (ss_residual / ss_total))
 
-# save both coefficients and r squared in an arrory
+# save both coefficients and r squared in an array
 coefficients = np.array(coefficients)
 r_squared = np.array(r_squared)
 
@@ -160,7 +160,7 @@ plt.title('R^2 over Time')
 plt.show()
 
 ## Part B
-
+mean_temp = 
 
 
 ```
@@ -274,7 +274,7 @@ import pandas as pd
 ## Part A
 
 # read in data
-stock_return_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/stock_returns.csv'
+stock_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/stock_returns.csv'
 stock_return_data = pd.read_csv(stock_return_link)
 
 
