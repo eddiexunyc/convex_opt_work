@@ -1,7 +1,7 @@
 ---
 title: "DATA 609 - Homework 2: Applications of Least Squares"
 author: Eddie Xu
-format: html 
+format: pdf
 editor: source
 ---
 
@@ -379,7 +379,7 @@ import pandas as pd
 
 # read in data
 stock_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/stock_returns.csv'
-stock_return_data = pd.read_csv(stock_return_link)
+stock_return_data = pd.read_csv(stock_url)
 
 
 
