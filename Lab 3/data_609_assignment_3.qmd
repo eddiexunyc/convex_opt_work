@@ -27,7 +27,7 @@ $dist(x, S) = \inf\{\|\mathbf{x}  − \mathbf{z}\|^2 | \mathbf{z} \in S\}$.
 
 Problem 1 Solution
 
-a. 
+a. The slab is convex set because it is an intersection of two halfspaces.
 b.
 c.
 d.
@@ -36,11 +36,8 @@ e.
 
 ## Problem 2 (cvx-book 2.15): 
 
-Some sets of probability distributions. Let $x$ be a real-valued random variable with probability
-distribution $\mathbf{prob}(x = a_i) = p_i, i = 1$ , . . . , $n$, where $a_1 \lt a_2 \lt $ · · · $\lt a_n$. Of course $p \in 
-\mathbb{R}^n$ lies in the standard probability simplex $P = \{\mathbf{p} | \mathbf{1}^T \mathbf{p} = 1, \mathbf{p} \preceq 0\}$. Which of the following
-conditions are convex in $\mathbf{p}$? (That is, for which of the following conditions is the set of
-$\mathbf{p} \in P$ that satisfy the condition convex?) For each case give the reason(s) why or why not.
+Some sets of probability distributions. Let $x$ be a real-valued random variable with probability distribution $\mathbf{prob}(x = a_i) = p_i, i = 1$ , . . . , $n$, where $a_1 \lt a_2 \lt $ · · · $\lt a_n$. Of course $p \in \mathbb{R}^n$ lies in the standard probability simplex $P = \{\mathbf{p} | \mathbf{1}^T \mathbf{p} = 1, \mathbf{p} \preceq 0\}$. Which of the following
+conditions are convex in $\mathbf{p}$? (That is, for which of the following conditions is the set of $\mathbf{p} \in P$ that satisfy the condition convex?) For each case give the reason(s) why or why not.
 
 a. The set of all $\mathbf{p}$ where the expectation of the function $f(x)$ is between two limits: $\alpha \leq Ef(x) \leq \beta$, $Ef(x) = \sum_{i=1}^n p_i f(a_i)$. Here $f(x)$ is
 a function from $\mathbb{R}$ to \mathbb{R}$.
@@ -49,6 +46,14 @@ c. The set of all $\mathbf{p}$ such that the expectation of $|x|^3$ is greater t
 $E|x^3| \leq \α E|x|$
 d. The set of all $\mathbf{p}$ such that the expectation of $x^2$ is less than a given constant $\alpha$: 
 $Ex^2 \leq \alpha$
+
+Problem 2 Solution
+
+a.
+b.
+c.
+d.
+e.
 
 ## Problem 3: Bounded Value Least Squares for Wine Mixing
 
