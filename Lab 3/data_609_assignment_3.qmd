@@ -27,10 +27,10 @@ $dist(x, S) = \inf\{\|\mathbf{x}  − \mathbf{z}\|^2 | \mathbf{z} \in S\}$.
 
 Problem 1 Solution
 
-a. The slab is convex set because it is an intersection of two halfspaces.
-b.
-c.
-d.
+a. The slab is a convex set because it is an intersection of two halfspaces.
+b. The rectangle is a convex set because the set contains a finite intersection of halfspaces.
+c. The wedge set is a convex set because like part a, it is an intersection of two halfspaces.
+d. 
 e.
 
 
@@ -49,11 +49,11 @@ $Ex^2 \leq \alpha$
 
 Problem 2 Solution
 
-a.
-b.
-c.
-d.
-e.
+a. The constraint is equivalent to a linear inequality
+b. The constraint is equivalent to a linear inequality
+c. The constraint is equivalent to a linear inequality
+d. The constraint is equivalent to a linear inequality
+e. The constraint is equivalent to a linear inequality
 
 ## Problem 3: Bounded Value Least Squares for Wine Mixing
 
@@ -92,8 +92,12 @@ $$
 
 Implement this least squares optimization problem using CVX and determine the optimal blend of wines to match the target.
 
-
-
+```{python}
+# load packages
+import numpy as np
+import pandas as pd
+import cvxpy as cp
+```
 
  
 
