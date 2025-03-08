@@ -33,7 +33,6 @@ c. The wedge set is a convex set because like part a, it is an intersection of t
 d. 
 e.
 
-
 ## Problem 2 (cvx-book 2.15): 
 
 Some sets of probability distributions. Let $x$ be a real-valued random variable with probability distribution $\mathbf{prob}(x = a_i) = p_i, i = 1$ , . . . , $n$, where $a_1 \lt a_2 \lt $ · · · $\lt a_n$. Of course $p \in \mathbb{R}^n$ lies in the standard probability simplex $P = \{\mathbf{p} | \mathbf{1}^T \mathbf{p} = 1, \mathbf{p} \preceq 0\}$. Which of the following
@@ -57,17 +56,11 @@ e. The constraint is equivalent to a linear inequality
 
 ## Problem 3: Bounded Value Least Squares for Wine Mixing
 
-We have seen several examples so far in the couse where we would like to have inequality constraints on the decision variable for our least squares problem, for example
-to prevent non-sensical solutions like spending a negative amount of money on advertising, limiting the total investment in certain types of assets, or perhaps bounding the
-value of a statistical coefficient to a certain range. Non-negative least squares is a type of least squares problem where the decision variables $\mathbf{x}\geq 0$, and
-Bounded-Value Least Squares allows for more general constraints.
+We have seen several examples so far in the couse where we would like to have inequality constraints on the decision variable for our least squares problem, for example to prevent non-sensical solutions like spending a negative amount of money on advertising, limiting the total investment in certain types of assets, or perhaps bounding the value of a statistical coefficient to a certain range. Non-negative least squares is a type of least squares problem where the decision variables $\mathbf{x}\geq 0$, and Bounded-Value Least Squares allows for more general constraints.
 
-This type of least-squares problem needs to be solved algorithmically, and we will use it to get our first practice using the `CVX` software package. You should install `CVXPY`, 
-`CVXR`, or a flavor of `CVX` compatible with whatever software you are using to solve the problem and use `CVX` to solve this problem.
+This type of least-squares problem needs to be solved algorithmically, and we will use it to get our first practice using the `CVX` software package. You should install `CVXPY`, `CVXR`, or a flavor of `CVX` compatible with whatever software you are using to solve the problem and use `CVX` to solve this problem.
 
-The problem is one of finding a mixture of wines which achieves certain chemical characteristics. I have attached a dataset which contains data on the chemical composition of 6
-different wines (the dataset originates from kaggle but is reduced for our purposes). Each wine is described according to 11 chemical characteristics, including `alcohol`, `residual sugar`,
-`chlorides`, etc. I have also provided data for the chemical composition for a target wine. 
+The problem is one of finding a mixture of wines which achieves certain chemical characteristics. I have attached a dataset which contains data on the chemical composition of 6 different wines (the dataset originates from kaggle but is reduced for our purposes). Each wine is described according to 11 chemical characteristics, including `alcohol`, `residual sugar`, `chlorides`, etc. I have also provided data for the chemical composition for a target wine. 
 
 - [wine_data.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/wine_data.csv) 
 - [target.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/target.csv) 
@@ -75,6 +68,7 @@ different wines (the dataset originates from kaggle but is reduced for our purpo
 The goal of this problem is to find the blend of wines which has chemical characteristics closest to the target wine.
 
 Concretely, you are solving for weights $\mathbf{p}$. The concentration of chemical $i$ in wine $j$ is given by the matrix $C_{ij}$, and the concentration in the blended wine is:
+
 $$
 c_{blend,i} = \sum_{j=1}^6 C_{ij} p_j,
 $$
@@ -97,6 +91,30 @@ Implement this least squares optimization problem using CVX and determine the op
 import numpy as np
 import pandas as pd
 import cvxpy as cp
+
+# extract data
+wine_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/wine_data.csv'
+target_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/target.csv'
+
+wine_data = pd.read_csv(wine_url)
+target_data = pd.read_csv(target_url)
+
+# extract the relevant data and define the decision variables
+C = wine_data.values  # 6 x 11 matrix of wine characteristics
+target = target_data.values.flatten()  # Target wine concentrations
+p = cp.Variable(6, nonneg=True)
+
+# define the objective function
+objective = cp.Minimize(cp.norm(np.diag(C) @ p - target))
+
+# solve the problem
+problem = cp.Problem(objective)
+problem.solve()
+
+# get the optimal weights for the wines
+optimal_weights = p.value
+print(f"Optimal wine blend weights: {optimal_weights}")
+
 ```
 
  
