@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -108,35 +142,38 @@ window.Quarto = {
 <ol type="a">
 <li>A slab, i.e., a set of the form <span class="math inline">\(\{x \in \mathbb{R}^n\, |\, \alpha \leq \mathbf{a}^T \mathbf{x} \leq{\beta}\}\)</span>.</li>
 <li>A rectangle, i.e., a set of the form <span class="math inline">\(\{x \in \mathbb{R}^n\, |\, \alpha_i \leq x_i \leq \beta_i, i = 1,\cdots,\, n\}\)</span>. A rectangle is sometimes called a hyperrectangle when n &gt; 2.</li>
-<li>A wedge, i.e., { ^n, |, ^T _1, _2^T_2}</li>
+<li>A wedge, i.e., <span class="math inline">\(\{ \mathbf{x} \in \mathbf{R}^n\, |\, \mathbf{a_1}^T\mathbf{x} \leq \mathbf{b}_1, \mathbf{a}_2^T\leq\mathbf{b}_2\}\)</span></li>
 <li>The set of points closer to a given point than a given set, i.e., <span class="math inline">\(\{ \mathbf{x}\, |\, \|\mathbf{x} − \mathbf{x}_0\|^2 \leq \|\mathbf{x} − \mathbf{y}\|^2\)</span> for all <span class="math inline">\(y \in S\}\)</span> where <span class="math inline">\(S \subset \mathbb{R}^n\)</span>.</li>
-<li>The set of points closer to one set than another, i.e., ${, | dist(, S) dist(, T )}, where <span class="math inline">\(S\)</span>, <span class="math inline">\(T\)</span> are subsets of <span class="math inline">\(\mathbf{R}^N\)</span>, and <span class="math inline">\(dist(x, S) = \inf\{\|\mathbf{x}  − \mathbf{z}\|^2 | \mathbf{z} \in S\}\)</span>.</li>
+<li>The set of points closer to one set than another, i.e., <span class="math inline">\(\{\mathbf{x}\ | dist(\mathbf{x}, S) \leq dist(\mathbf{x}, T )\}\)</span>, where <span class="math inline">\(S\)</span>, <span class="math inline">\(T\)</span> are subsets of <span class="math inline">\(\mathbf{R}^N\)</span>, and <span class="math inline">\(dist(x, S) = \inf\{\|\mathbf{x}  − \mathbf{z}\|^2 | \mathbf{z} \in S\}\)</span>.</li>
 </ol>
 <p>Problem 1 Solution</p>
 <ol type="a">
 <li>The slab is a convex set because it is an intersection of two halfspaces.</li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
+<li>The rectangle is a convex set because the set contains a finite intersection of halfspaces.</li>
+<li>The wedge set is a convex set because like part a, it is an intersection of two halfspaces.</li>
+<li>The set of points is a convex set because the set can be expressed as an intersection of halfspaces where <span class="math inline">\(\quad S = \{ x \mid \| x - x_0 \|_2 \leq \| x - y \|_2 \}\)</span> for fixed y</li>
+<li>The set of points is not a convex set because for <span class="math inline">\(\quad {x | dist(x, S) ≤ dist(x, T)}\)</span>, both subset <span class="math inline">\(S\)</span> and <span class="math inline">\(T\)</span> are not convex sets when <span class="math inline">\(\quad{x ∈ R | x ≤ −1/2}\)</span> or <span class="math inline">\(\quad {x ≥ 1/2}\)</span></li>
 </ol>
 </section>
 <section id="problem-2-cvx-book-2.15" class="level2">
 <h2 class="anchored" data-anchor-id="problem-2-cvx-book-2.15">Problem 2 (cvx-book 2.15):</h2>
-<p>Some sets of probability distributions. Let <span class="math inline">\(x\)</span> be a real-valued random variable with probability distribution <span class="math inline">\(\mathbf{prob}(x = a_i) = p_i, i = 1\)</span> , . . . , <span class="math inline">\(n\)</span>, where $a_1 a_2 $ · · · <span class="math inline">\(\lt a_n\)</span>. Of course <span class="math inline">\(p \in \mathbb{R}^n\)</span> lies in the standard probability simplex <span class="math inline">\(P = \{\mathbf{p} | \mathbf{1}^T \mathbf{p} = 1, \mathbf{p} \preceq 0\}\)</span>. Which of the following conditions are convex in <span class="math inline">\(\mathbf{p}\)</span>? (That is, for which of the following conditions is the set of <span class="math inline">\(\mathbf{p} \in P\)</span> that satisfy the condition convex?) For each case give the reason(s) why or why not.</p>
+<p>Some sets of probability distributions. Let <span class="math inline">\(x\)</span> be a real-valued random variable with probability distribution</p>
+<p><span class="math display">\[\mathbf{prob}(x = a_i) = p_i, i = 1, \cdots, n\]</span></p>
+<p>where: <span class="math inline">\(a_1 &lt; a_2 &lt; \cdots &lt; a_n\)</span>. Of course <span class="math inline">\(\mathbf{p} \in \mathbb{R}^n\)</span> lies in the standard probability simplex <span class="math inline">\(P \{\mathbf{p}\, |\, 1^T \mathbf{p} = 1, \mathbf{p} \preceq 0\}\)</span>.</p>
+<p>Which of the following conditions are convex in <span class="math inline">\(\mathbf{p}\)</span>? (That is, for which of the following conditions is the set of <span class="math inline">\(\mathbf{p} \in P\)</span> that satisfy the condition convex?) For each case give the reason(s) why or why not.</p>
+<p>Which of the following conditions are convex in <span class="math inline">\(\mathbf{p}\)</span>? (That is, for which of the following conditions is the set of <span class="math inline">\(\mathbf{p} \in P\)</span> that satisfy the condition convex?) For each case give the reason(s) why or why not.</p>
 <ol type="a">
-<li>The set of all <span class="math inline">\(\mathbf{p}\)</span> where the expectation of the function <span class="math inline">\(f(x)\)</span> is between two limits: <span class="math inline">\(\alpha \leq Ef(x) \leq \beta\)</span>, <span class="math inline">\(Ef(x) = \sum_{i=1}^n p_i f(a_i)\)</span>. Here <span class="math inline">\(f(x)\)</span> is a function from <span class="math inline">\(\mathbb{R}\)</span> to $.</li>
+<li>The set of all <span class="math inline">\(\mathbf{p}\)</span> where the expectation of the function <span class="math inline">\(f(x)\)</span> is between two limits: <span class="math inline">\(\alpha \leq Ef(x) \leq \beta\)</span>, <span class="math inline">\(Ef(x) = \sum_{i=1}^n p_i f(a_i)\)</span>. Here <span class="math inline">\(f(x)\)</span> is a function from <span class="math inline">\(\mathbb{R}\)</span> to <span class="math inline">\(\mathbb{R}\)</span>.</li>
 <li>The set of all <span class="math inline">\(\mathbf{p}\)</span> such that the probability that <span class="math inline">\(\mathbf{prob}(x\leq\alpha) \leq \beta\)</span></li>
-<li>The set of all <span class="math inline">\(\mathbf{p}\)</span> such that the expectation of <span class="math inline">\(|x|^3\)</span> is greater than a given constant <span class="math inline">\(\alpha\)</span> times the expectation of <span class="math inline">\(|x|\)</span>: <span class="math inline">\(E|x^3| \leq \α E|x|\)</span></li>
+<li>The set of all <span class="math inline">\(\mathbf{p}\)</span> such that the expectation of <span class="math inline">\(|x|^3\)</span> is greater than a given constant <span class="math inline">\(\alpha\)</span> times the expectation of <span class="math inline">\(|x|\)</span>: $E|x^3| <span class="math inline">\(\leq\)</span> <span class="math inline">\(\α E|x|\)</span></li>
 <li>The set of all <span class="math inline">\(\mathbf{p}\)</span> such that the expectation of <span class="math inline">\(x^2\)</span> is less than a given constant <span class="math inline">\(\alpha\)</span>: <span class="math inline">\(Ex^2 \leq \alpha\)</span></li>
 </ol>
 <p>Problem 2 Solution</p>
 <ol type="a">
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
+<li><span class="math inline">\(Ef(x) = \sum_{i=1}^n p_i f(a_i)\)</span> can be defined as a convex set since the constraint is equivalent to two linear inequalities in the probabilities <span class="math inline">\(p_i\)</span>.</li>
+<li>The set of all <span class="math inline">\(\mathbf{p}\)</span> such that the probability that <span class="math inline">\(\mathbf{prob}(x\leq\alpha) \leq \beta\)</span> can be defined as a convex set because the constraint is equivalent to a linear inequality in the probabilities <span class="math inline">\(p_i\)</span>.</li>
+<li>The set of all <span class="math inline">\(\mathbf{p}\)</span> such that the expectation of <span class="math inline">\(|x|^3\)</span> is greater than a given constant <span class="math inline">\(\alpha\)</span> times the expectation of <span class="math inline">\(|x|\)</span>: $E|x^3| <span class="math inline">\(\leq\)</span> <span class="math inline">\(\α E|x|\)</span> can be defined as a convex set because the constraint is equivalent to a linear inequality in the probabilities <span class="math inline">\(p_i\)</span>.</li>
+<li>The set of all <span class="math inline">\(\mathbf{p}\)</span> such that the expectation of <span class="math inline">\(x^2\)</span> is less than a given constant <span class="math inline">\(\alpha\)</span>: <span class="math inline">\(Ex^2 \leq \alpha\)</span> can be defined as a convex set because the constraint is equivalent to a linear inequality in the probabilities <span class="math inline">\(p_i\)</span>.</li>
 </ol>
 </section>
 <section id="problem-3-bounded-value-least-squares-for-wine-mixing" class="level2">
@@ -149,7 +186,8 @@ window.Quarto = {
 <li><a href="https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/target.csv">target.csv</a></li>
 </ul>
 <p>The goal of this problem is to find the blend of wines which has chemical characteristics closest to the target wine.</p>
-<p>Concretely, you are solving for weights <span class="math inline">\(\mathbf{p}\)</span>. The concentration of chemical <span class="math inline">\(i\)</span> in wine <span class="math inline">\(j\)</span> is given by the matrix <span class="math inline">\(C_{ij}\)</span>, and the concentration in the blended wine is: <span class="math display">\[
+<p>Concretely, you are solving for weights <span class="math inline">\(\mathbf{p}\)</span>. The concentration of chemical <span class="math inline">\(i\)</span> in wine <span class="math inline">\(j\)</span> is given by the matrix <span class="math inline">\(C_{ij}\)</span>, and the concentration in the blended wine is:</p>
+<p><span class="math display">\[
 c_{blend,i} = \sum_{j=1}^6 C_{ij} p_j,
 \]</span> so that the overall concentration vector in the blend satisfies: <span class="math display">\[
 \mathbf{c}_{blend} = C\mathbf{p}
@@ -159,6 +197,38 @@ c_{blend,i} = \sum_{j=1}^6 C_{ij} p_j,
 \min_{\mathbf{p}} \sum_{i=1}^{11} \left(\frac{c_i-c_{blend,_i}}{c_i}\right)^2
 \]</span></p>
 <p>Implement this least squares optimization problem using CVX and determine the optimal blend of wines to match the target.</p>
+<div id="f626af3d" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load packages</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cvxpy <span class="im">as</span> cp</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># extract data</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>wine_url <span class="op">=</span> <span class="st">'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/wine_data.csv'</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>target_url <span class="op">=</span> <span class="st">'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/target.csv'</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>wine_data <span class="op">=</span> pd.read_csv(wine_url)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>target_data <span class="op">=</span> pd.read_csv(target_url)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># extract the relevant data and define the decision variables</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> wine_data.values</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>target <span class="op">=</span> target_data.values.flatten() </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> cp.Variable(<span class="dv">6</span>, nonneg<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># define the objective function</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>objective <span class="op">=</span> cp.Minimize(cp.norm(np.diag(C) <span class="op">@</span> p <span class="op">-</span> target))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># solve the problem</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>problem <span class="op">=</span> cp.Problem(objective)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>problem.solve()</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># get the optimal weights for the wines</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>optimal_weights <span class="op">=</span> p.value</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Optimal wine blend weights: </span><span class="sc">{</span>optimal_weights<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimal wine blend weights: [0.02638134 3.18943341 4.38723391 1.20138733 5.65966594 0.04696901]</code></pre>
+</div>
+</div>
 </section>
 
 </main>
