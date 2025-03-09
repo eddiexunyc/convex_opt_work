@@ -1,7 +1,7 @@
 ---
 title: "DATA 609 - Homework 3: Convex Sets"
 author: Eddie Xu
-format: html
+format: pdf
 editor: source
 ---
 
@@ -24,32 +24,25 @@ Problem 1 Solution
 a. The slab is a convex set because it is an intersection of two halfspaces.
 b. The rectangle is a convex set because the set contains a finite intersection of halfspaces.
 c. The wedge set is a convex set because like part a, it is an intersection of two halfspaces.
-d. The set of points is a convex set because the set can be expressed as an intersection of halfspaces where $\quad S = \{ x \mid \| x - x_0 \|_2 \leq \| x - y \|_2 \}$ for fixed y
+d. The set of points is a convex set because the set can be expressed as an intersection of halfspaces where $\quad S = \{ x \mid \| x - x_0 \|_2\leq\| x - y \|_2 \}$ for fixed y
 e. The set of points is not a convex set because for $\quad {x | dist(x, S) ≤ dist(x, T)}$, both subset $S$ and $T$ are not convex sets when $\quad{x ∈ R | x ≤ −1/2}$ or $\quad {x ≥ 1/2}$
 
 ## Problem 2 (cvx-book 2.15): 
 
 Some sets of probability distributions. Let $x$ be a real-valued random variable with probability distribution 
 
-$$\mathbf{prob}(x = a_i) = p_i, i = 1, \cdots, n$$
+Which of the following conditions are convex in $\mathbf{p}$? (That is, for which of the following conditions is the set of $\mathbf{p}$ in $P$ that satisfy the condition convex?) For each case give the reason(s) why or why not.
 
-where:  $a_1 < a_2 < \cdots < a_n$. Of course $\mathbf{p} \in \mathbb{R}^n$ lies in the standard probability simplex $P \{\mathbf{p}\, |\, 1^T \mathbf{p} = 1, \mathbf{p} \preceq 0\}$. 
-
-Which of the following conditions are convex in $\mathbf{p}$? (That is, for which of the following conditions is the set of $\mathbf{p} \in P$ that satisfy the condition convex?) For each case give the reason(s) why or why not.
-
-Which of the following conditions are convex in $\mathbf{p}$? (That is, for which of the following conditions is the set of $\mathbf{p} \in P$ that satisfy the condition convex?) For each case give the reason(s) why or why not.
-
-a. The set of all $\mathbf{p}$ where the expectation of the function $f(x)$ is between two limits: $\alpha \leq Ef(x) \leq \beta$, $Ef(x) = \sum_{i=1}^n p_i f(a_i)$. Here $f(x)$ is
-a function from $\mathbb{R}$ to $\mathbb{R}$.
-b. The set of all $\mathbf{p}$ such that the probability that $\mathbf{prob}(x\leq\alpha) \leq \beta$ 
-c. The set of all $\mathbf{p}$ such that the expectation of $|x|^3$ is greater than a given constant $\alpha$ times the expectation of $|x|$: $E|x^3| $\leq$ $\α E|x|$
-d. The set of all $\mathbf{p}$ such that the expectation of $x^2$ is less than a given constant $\alpha$: $Ex^2 \leq \alpha$
+a. The set of all $\mathbf{p}$ where the expectation of the function $f(x)$ is between two limits: $\alpha\leq Ef(x) \leq\beta$, $Ef(x) = \sum_{i=1}^n p_i f(a_i)$. Here $f(x)$ is a function from $\mathbb{R}$ to $\mathbb{R}$.
+b. The set of all $\mathbf{p}$ such that the probability that $\mathbf{prob}(x\leq\alpha) \leq\beta$ 
+c. The set of all $\mathbf{p}$ such that the expectation of $|x|^3$ is greater than a given constant $\alpha$ times the expectation of $|x|: E|x^3| \leq\alpha  E|x|$ 
+d. The set of all $\mathbf{p}$ such that the expectation of $x^2$ is less than a given constant $\alpha$: $Ex^2\leq\alpha$
 
 Problem 2 Solution
 
 a. $Ef(x) = \sum_{i=1}^n p_i f(a_i)$ can be defined as a convex set since the constraint is equivalent to two linear inequalities in the probabilities $p_i$.
 b. The set of all $\mathbf{p}$ such that the probability that $\mathbf{prob}(x\leq\alpha) \leq \beta$ can be defined as a convex set because the constraint is equivalent to a linear inequality in the probabilities $p_i$.
-c. The set of all $\mathbf{p}$ such that the expectation of $|x|^3$ is greater than a given constant $\alpha$ times the expectation of $|x|$: $E|x^3| $\leq$ $\α E|x|$ can be defined as a convex set because the constraint is equivalent to a linear inequality in the probabilities $p_i$.
+c. The set of all $\mathbf{p}$ such that the expectation of $|x|^3$ is greater than a given constant $\alpha$ times the expectation of $|x|$: $E|x^3| \leq\alpha E|x|$ can be defined as a convex set because the constraint is equivalent to a linear inequality in the probabilities $p_i$.
 d. The set of all $\mathbf{p}$ such that the expectation of $x^2$ is less than a given constant $\alpha$: $Ex^2 \leq \alpha$ can be defined as a convex set because the constraint is equivalent to a linear inequality in the probabilities $p_i$.
 
 ## Problem 3: Bounded Value Least Squares for Wine Mixing
@@ -111,7 +104,7 @@ problem.solve()
 
 # get the optimal weights for the wines
 optimal_weights = p.value
-print(f"Optimal wine blend weights: {optimal_weights}")
+print(f"The optimal wine blend weights using convex optimization are: {optimal_weights}")
 ```
 
  

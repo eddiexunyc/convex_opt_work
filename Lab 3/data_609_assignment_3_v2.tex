@@ -66,46 +66,6 @@
 \fi
 \makeatother
 
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{241,243,245}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
-\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
-\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
@@ -182,8 +142,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
-  pdftitle={DATA 609 - Homework 3: Convex Sets},
-  pdfauthor={Eddie Xu},
+  pdftitle={Homework 3: Convex Sets},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -192,8 +151,8 @@
   pdfcreator={LaTeX via pandoc}}
 
 
-\title{DATA 609 - Homework 3: Convex Sets}
-\author{Eddie Xu}
+\title{Homework 3: Convex Sets}
+\author{}
 \date{}
 
 \begin{document}
@@ -224,60 +183,27 @@ why or why not
   2.
 \item
   A wedge, i.e.,
-  \(\{ \mathbf{x} \in \mathbf{R}^n\, |\, \mathbf{a_1}^T\mathbf{x} \leq \mathbf{b}_1, \mathbf{a}_2^T\leq\mathbf{b}_2\}\)
+  \(\{ \mathbf{x} \in \mathbb{R}^n\, |\, \mathbf{a_1}^T\mathbf{x} \leq \mathbf{b}_1, \mathbf{a}_2^T\leq\mathbf{b}_2\}\)
 \item
   The set of points closer to a given point than a given set, i.e.,
   \(\{ \mathbf{x}\, |\, \|\mathbf{x} − \mathbf{x}_0\|^2 \leq \|\mathbf{x} − \mathbf{y}\|^2\)
   for all \(y \in S\}\) where \(S \subset \mathbb{R}^n\).
 \item
   The set of points closer to one set than another, i.e.,
-  \(\{\mathbf{x}\ | dist(\mathbf{x}, S) \leq dist(\mathbf{x}, T )\}\),
-  where \(S\), \(T\) are subsets of \(\mathbf{R}^N\), and
+  \(\{\mathbf{x}\, | dist(\mathbf{x}, S) \leq dist(\mathbf{x}, T )\}\),
+  where \(S\), \(T\) are subsets of \(\mathbb{R}^N\), and
   \(dist(x, S) = \inf\{\|\mathbf{x}  − \mathbf{z}\|^2 | \mathbf{z} \in S\}\).
-\end{enumerate}
-
-Problem 1 Solution
-
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\tightlist
-\item
-  The slab is a convex set because it is an intersection of two
-  halfspaces.
-\item
-  The rectangle is a convex set because the set contains a finite
-  intersection of halfspaces.
-\item
-  The wedge set is a convex set because like part a, it is an
-  intersection of two halfspaces.
-\item
-  The set of points is a convex set because the set can be expressed as
-  an intersection of halfspaces where
-  \(\quad S = \{ x \mid \| x - x_0 \|_2 \leq \| x - y \|_2 \}\) for
-  fixed y
-\item
-  The set of points is not a convex set because for
-  \(\quad {x | dist(x, S) ≤ dist(x, T)}\), both subset \(S\) and \(T\)
-  are not convex sets when \(\quad{x ∈ R | x ≤ −1/2}\) or
-  \(\quad {x ≥ 1/2}\)
 \end{enumerate}
 
 \subsection{Problem 2 (cvx-book 2.15):}\label{problem-2-cvx-book-2.15}
 
 Some sets of probability distributions. Let \(x\) be a real-valued
 random variable with probability distribution
-
-\[\mathbf{prob}(x = a_i) = p_i, i = 1, \cdots, n\]
+\[\mathbf{prob}(x = a_i) = p_i, i = 1, \cdots, n\],
 
 where: \(a_1 < a_2 < \cdots < a_n\). Of course
 \(\mathbf{p} \in \mathbb{R}^n\) lies in the standard probability simplex
 \(P \{\mathbf{p}\, |\, 1^T \mathbf{p} = 1, \mathbf{p} \preceq 0\}\).
-
-Which of the following conditions are convex in \(\mathbf{p}\)? (That
-is, for which of the following conditions is the set of
-\(\mathbf{p} \in P\) that satisfy the condition convex?) For each case
-give the reason(s) why or why not.
-
 Which of the following conditions are convex in \(\mathbf{p}\)? (That
 is, for which of the following conditions is the set of
 \(\mathbf{p} \in P\) that satisfy the condition convex?) For each case
@@ -297,37 +223,10 @@ give the reason(s) why or why not.
 \item
   The set of all \(\mathbf{p}\) such that the expectation of \(|x|^3\)
   is greater than a given constant \(\alpha\) times the expectation of
-  \(|x|\): \$E\textbar x\^{}3\textbar{} \(\leq\) \(\α E|x|\)
+  \(|x|\): \(E|x^3| \leq \alpha  E|x|\)
 \item
   The set of all \(\mathbf{p}\) such that the expectation of \(x^2\) is
   less than a given constant \(\alpha\): \(Ex^2 \leq \alpha\)
-\end{enumerate}
-
-Problem 2 Solution
-
-\begin{enumerate}
-\def\labelenumi{\alph{enumi}.}
-\tightlist
-\item
-  \(Ef(x) = \sum_{i=1}^n p_i f(a_i)\) can be defined as a convex set
-  since the constraint is equivalent to two linear inequalities in the
-  probabilities \(p_i\).
-\item
-  The set of all \(\mathbf{p}\) such that the probability that
-  \(\mathbf{prob}(x\leq\alpha) \leq \beta\) can be defined as a convex
-  set because the constraint is equivalent to a linear inequality in the
-  probabilities \(p_i\).
-\item
-  The set of all \(\mathbf{p}\) such that the expectation of \(|x|^3\)
-  is greater than a given constant \(\alpha\) times the expectation of
-  \(|x|\): \$E\textbar x\^{}3\textbar{} \(\leq\) \(\α E|x|\) can be
-  defined as a convex set because the constraint is equivalent to a
-  linear inequality in the probabilities \(p_i\).
-\item
-  The set of all \(\mathbf{p}\) such that the expectation of \(x^2\) is
-  less than a given constant \(\alpha\): \(Ex^2 \leq \alpha\) can be
-  defined as a convex set because the constraint is equivalent to a
-  linear inequality in the probabilities \(p_i\).
 \end{enumerate}
 
 \subsection{Problem 3: Bounded Value Least Squares for Wine
@@ -370,13 +269,12 @@ chemical characteristics closest to the target wine.
 
 Concretely, you are solving for weights \(\mathbf{p}\). The
 concentration of chemical \(i\) in wine \(j\) is given by the matrix
-\(C_{ij}\), and the concentration in the blended wine is:
+\(C_{ij}\), and the concentration in the blended wine is: c\_\{blend,i\}
+= \sum\emph{\{j=1\}\^{}6 C}\{ij\} p\_j,
 
-\[
-c_{blend,i} = \sum_{j=1}^6 C_{ij} p_j,
-\] so that the overall concentration vector in the blend satisfies: \[
-\mathbf{c}_{blend} = C\mathbf{p}
-\]
+so that the overall concentration vector in the blend satisfies:
+
+\mathbf{c}\_\{blend\} = C\mathbf{p} \$\$
 
 The vector \(\mathbf{p}\) is a discrete probability distribution,
 meaning that all entries are non-negative and must sum to \(1\) (you
@@ -390,42 +288,6 @@ according to the magnitude of the value in the target function:
 
 Implement this least squares optimization problem using CVX and
 determine the optimal blend of wines to match the target.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# load packages}
-\ImportTok{import}\NormalTok{ numpy }\ImportTok{as}\NormalTok{ np}
-\ImportTok{import}\NormalTok{ pandas }\ImportTok{as}\NormalTok{ pd}
-\ImportTok{import}\NormalTok{ cvxpy }\ImportTok{as}\NormalTok{ cp}
-
-\CommentTok{\# extract data}
-\NormalTok{wine\_url }\OperatorTok{=} \StringTok{\textquotesingle{}https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/wine\_data.csv\textquotesingle{}}
-\NormalTok{target\_url }\OperatorTok{=} \StringTok{\textquotesingle{}https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/target.csv\textquotesingle{}}
-
-\NormalTok{wine\_data }\OperatorTok{=}\NormalTok{ pd.read\_csv(wine\_url)}
-\NormalTok{target\_data }\OperatorTok{=}\NormalTok{ pd.read\_csv(target\_url)}
-
-\CommentTok{\# extract the relevant data and define the decision variables}
-\NormalTok{C }\OperatorTok{=}\NormalTok{ wine\_data.values}
-\NormalTok{target }\OperatorTok{=}\NormalTok{ target\_data.values.flatten() }
-\NormalTok{p }\OperatorTok{=}\NormalTok{ cp.Variable(}\DecValTok{6}\NormalTok{, nonneg}\OperatorTok{=}\VariableTok{True}\NormalTok{)}
-
-\CommentTok{\# define the objective function}
-\NormalTok{objective }\OperatorTok{=}\NormalTok{ cp.Minimize(cp.norm(np.diag(C) }\OperatorTok{@}\NormalTok{ p }\OperatorTok{{-}}\NormalTok{ target))}
-
-\CommentTok{\# solve the problem}
-\NormalTok{problem }\OperatorTok{=}\NormalTok{ cp.Problem(objective)}
-\NormalTok{problem.solve()}
-
-\CommentTok{\# get the optimal weights for the wines}
-\NormalTok{optimal\_weights }\OperatorTok{=}\NormalTok{ p.value}
-\BuiltInTok{print}\NormalTok{(}\SpecialStringTok{f"Optimal wine blend weights: }\SpecialCharTok{\{}\NormalTok{optimal\_weights}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-Optimal wine blend weights: [0.02638134 3.18943341 4.38723391 1.20138733 5.65966594 0.04696901]
-\end{verbatim}
 
 
 
