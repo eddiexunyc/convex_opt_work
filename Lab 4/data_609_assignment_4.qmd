@@ -44,12 +44,11 @@ Determine the curvature of the functions below. Your responses can be affine, co
 
 Problem 2 Solution
 
-(a) $f(x) = \min(2,x,\sqrt{x})$ with $\mathbf{dom} f = \{x\,|\, x\geq 0\}$ (i.e. $\mathbb{R}_+$)
-(b) $f(x) = x^3$, with  $\mathbf{dom} f = \mathbb{R}$ 
-(c) $f(x) = x^3$, with   $\mathbf{dom} f = \{x\,|\, x\geq 1\}$
-(d) $f(x,y) = \sqrt{x\min(y,2)}$, with $\mathbf{dom} f = \{(x,y)\,|\, x\geq 0\, , y\geq 0\}$ (i.e. $\mathbb{R}^2_+$)
-(e) $f(x,y) = \left(\sqrt{x} +\sqrt{y}\right)^2$ with $\mathbf{dom} f = \{(x,y)\,|\, x\geq 0\,,\, y\geq 0\}$ (i.e. $\mathbb{R}^2_+$)
-
+(a) This function is convex.
+(b) This function is not convex or concave.
+(c) This function is convex.
+(d) This function is convex.
+(e) This function is convex.
 
 ## Problem 3: (Selected from CVX Book Extended Exercises 3.51-3.52)
 
@@ -58,17 +57,6 @@ and use CVX to verify that they are convex
 
 (a) $f(x,y) = \frac{1}{xy}$, with $\mathbf{dom} f = \mathbb{R}^2_{++}$. Hint: Use the Atoms listed below part (b) as well as addition, subtraction, and scalar multiplication. 
 There are multiple ways to solve this problem.
-
-(b) $f(x,y) = \sqrt{1+\frac{x^2}{y}}$, with $\mathbf{dom} f = \mathbb{R}\times\mathbb{R}_{++}$ (this means $x$ is any real number and $y$ is strictly greater than 0. 
-
-Hint: The following atoms may be helpful, there are multiple ways to solve this problem.
-
-- `inv_pos(u)`, which is $1/u$, with domain $\mathbb{R}_{++}$
-- `square(u)`, which is `u^2` , with domain $\mathbb{R}$
-- `sqrt(u)`, which is $\sqrt{u}$, with domain $\mathbb{R}_+$
-- `geo_mean(u,v)`, which is $\sqrt{uv}$, with domain $\mathbb{R}^2_+$
-- `quad_over_lin(u,v)`, which is $u^2/v$, with domain $\mathbb{R} \times \mathbb{R}_{++}$
-- `norm2(u,v)`, which is $\sqrt{u^2 + v^2}$ , with domain $\mathbb{R}^2$.
 
 Problem 3(a) Solution
 
@@ -93,6 +81,9 @@ print(f"Optimal y: {y.value}")
 print(f"Objective value: {f.value}")
 ```
 
+
+(b) $f(x,y) = \sqrt{1+\frac{x^2}{y}}$, with $\mathbf{dom} f = \mathbb{R}\times\mathbb{R}_{++}$ (this means $x$ is any real number and $y$ is strictly greater than 0. 
+
 Problem 3(b) Solution
 
 ```{python}
@@ -116,9 +107,18 @@ print(f"Optimal y: {y.value}")
 print(f"Objective value: {f.value}")
 ```
 
+Hint: The following atoms may be helpful, there are multiple ways to solve this problem.
+
+- `inv_pos(u)`, which is $1/u$, with domain $\mathbb{R}_{++}$
+- `square(u)`, which is `u^2` , with domain $\mathbb{R}$
+- `sqrt(u)`, which is $\sqrt{u}$, with domain $\mathbb{R}_+$
+- `geo_mean(u,v)`, which is $\sqrt{uv}$, with domain $\mathbb{R}^2_+$
+- `quad_over_lin(u,v)`, which is $u^2/v$, with domain $\mathbb{R} \times \mathbb{R}_{++}$
+- `norm2(u,v)`, which is $\sqrt{u^2 + v^2}$ , with domain $\mathbb{R}^2$.
+
 ## Problem 4: Periodic Poisson Regression to predict Car Crashes
 
-For this problem, we will be working with the dataset [nyc_crashes.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/nyc_crashes.csv), which contains a time series of the number of car crashes occurring in Manhattan every hour for a period of time.
+For this problem, we will be working with the dataset [nyc_crashes.csv](https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv), which contains a time series of the number of car crashes occurring in Manhattan every hour for a period of time.
 
  Here we will develop a Poisson regression model to predict rate of crashes during each time of day. 
 
@@ -147,7 +147,19 @@ $$
 
 where $\log(\lambda)$ is interpreted as a vector whose $i$th entry is $\log(\lambda_i)$ and the vector $\mathbf{1}^T$ has all entries equal to $1$ and has the right dimension in each case to make the resulting expressions scalars (24 and $N$, for our dataset $N$ will be 43).
 
-Show that $L(C|\lambda)$ is a convex function of the coefficients $\lambda$ on the domain $\lambda \in \mathbb{R}^{24}_{++}$. 
+Show that $L(C|\lambda)$ is a convex function of the coefficients $\lambda$ on the domain $\lambda \in \mathbb{R}^{24}_{++}$.
+
+```{python}
+# load packages
+import cvxpy as cp
+import pandas as pd
+
+# extract data
+crash_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv'
+
+crash_data = pd.read_csv(crash_url)
+
+```
 
 (b) The log-likelihood function $L$ can be minimized to find the maximum likelihood estimate for the $\lambda$ coefficients. Formulate this constrained optimization problem in `CVX`
 and solve it for the NYC crashes dataset, that is solve:
