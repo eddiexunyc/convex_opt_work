@@ -30,7 +30,7 @@ The first function appears to be a quasiconvex because the sublevel sets appear 
 
 Problem 1(b) Solution
 
-
+For this funcion, it is
 
 ## Problem 2: (CVX Book Extended Exercises 3.1)
 
@@ -73,7 +73,7 @@ f = cp.inv_pos(x * y)
 
 # solve it
 problem = cp.Problem(cp.Minimize(f))
-problem.solve()
+problem.solve(gp = True)
 
 # print
 print(f"Optimal x: {x.value}")
@@ -99,7 +99,7 @@ f = cp.sqrt(1 + cp.quad_over_lin(x, y))
 
 # solve
 problem = cp.Problem(cp.Minimize(f))
-problem.solve()
+problem.solve(verbose=True)
 
 # print
 print(f"Optimal x: {x.value}")
@@ -149,6 +149,8 @@ where $\log(\lambda)$ is interpreted as a vector whose $i$th entry is $\log(\lam
 
 Show that $L(C|\lambda)$ is a convex function of the coefficients $\lambda$ on the domain $\lambda \in \mathbb{R}^{24}_{++}$.
 
+Problem 4(a) Solution
+
 ```{python}
 # load packages
 import cvxpy as cp
@@ -171,6 +173,10 @@ $$
 
  Make a plot of the $\lambda$ coefficients
 
+Problem 4(b) Solution
+
+
+
 (c) It would be reasonable to expect that the rate of crashes in two adjacent hours should be similar, i.e. the observation that there has been a crash at 3:01PM should influence the estimate of the rate of crashes between 2:00PM and 3:00PM in addition to between 3:00PM and 4:00PM. 
 
 One way to implement this is through the following regularization term, which applies a penalty proportional to the square of the difference between $\lambda_i$ and $\lambda_{i+1}$:
@@ -181,6 +187,8 @@ $$
 
 Assuming that $\rho>0$, show that $L_{pen}(C|\lambda)$ is a convex function on $\mathbb{R}^{24}_{++}$ 
 
+Problem 4(c) Solution
+
 (d) Formulate the regularized maximum likelihood problem:
 
 $$
@@ -189,6 +197,9 @@ $$
 $$
 
 and solve it using `CVX`. Solve it for a range of positive values $\rho$ such that for your smallest values the solution appears like your solution to (b) and for your largest values the $\lambda$ show much less variation over time.
+
+Problem 4(d) Solution
+
 
 Hint: There are many ways to implement this penalty term in `cvx`. A way that you might find useful is to define a matrix $S$ where $S_{ii} = 1$, $S_{i,i-1} = -1$ for $i>1$ and $S_{1,24}=-1$, with $S=0$ for all other entries:
 
