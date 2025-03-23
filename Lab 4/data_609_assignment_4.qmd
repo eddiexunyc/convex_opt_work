@@ -9,7 +9,6 @@ author: Eddie Xu
 
 Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file, I recommend python, julia, or R. 
 
-
 ## Problem 1: (Exercise 3.2 in CVX Book) 
 
 (a) The figure below shows three levels sets for a function $f$. The value of the function on the level set is indicated by the number next to each curve. For example, the curve labeled $1$ corresponds to the points $\mathbf{x}\in\mathbb{R}^2$ satisfying $f(\mathbf{x}) = 1$. 
@@ -20,17 +19,17 @@ Note: it may be that several options are possible, that one is possible, or that
 
 ![Level Curves of $f$](lab4_fig1a.png){width=40%}
 
-Problem 1(a) Solution
+### Problem 1(a) Solution
 
-The first function appears to be a quasiconvex because the sublevel sets appear to be convex. It is definitely not concave or quasiconcave because the superlevel sets are not convex.
+The first function appears to be a quasiconvex or convex because the sublevel sets appear to be convex. It is definitely not concave or quasiconcave because the superlevel sets appears not to be convex.
 
 (b) The figure below shows level sets for a different function $g$. Again determine whether it is possible for the function $g$ to be convex, concave, quasiconvex, or quasiconcave. Note: it may be that several options are possible, that one is possible, or that none at all are.
 
 ![Level Curves of $g$](lab_fig1b.png){width=40%}
 
-Problem 1(b) Solution
+### Problem 1(b) Solution
 
-For this funcion, it is
+For this funcion, it appears not to be convex, concave, quasiconvex, or quasiconcave. The reason why 
 
 ## Problem 2: (CVX Book Extended Exercises 3.1)
 
@@ -42,7 +41,7 @@ Determine the curvature of the functions below. Your responses can be affine, co
 (d) $f(x,y) = \sqrt{x\min(y,2)}$, with $\mathbf{dom} f = \{(x,y)\,|\, x\geq 0\, , y\geq 0\}$ (i.e. $\mathbb{R}^2_+$)
 (e) $f(x,y) = \left(\sqrt{x} +\sqrt{y}\right)^2$ with $\mathbf{dom} f = \{(x,y)\,|\, x\geq 0\,,\, y\geq 0\}$ (i.e. $\mathbb{R}^2_+$)
 
-Problem 2 Solution
+### Problem 2 Solution
 
 (a) This function is convex.
 (b) This function is not convex or concave.
@@ -58,48 +57,52 @@ and use CVX to verify that they are convex
 (a) $f(x,y) = \frac{1}{xy}$, with $\mathbf{dom} f = \mathbb{R}^2_{++}$. Hint: Use the Atoms listed below part (b) as well as addition, subtraction, and scalar multiplication. 
 There are multiple ways to solve this problem.
 
-Problem 3(a) Solution
+### Problem 3(a) Solution
 
 ```{python}
-# import packages
 import cvxpy as cp
 
-# define variables
-x = cp.Variable(pos=True)  # x > 0
-y = cp.Variable(pos=True)  # y > 0
+# define both variables which need to be positive
+x = cp.Variable(pos=True)  
+y = cp.Variable(pos=True)
 
-# define the objective function f(x, y) = 1 / (x * y)
-f = cp.inv_pos(x * y)
+# Define the function f(x, y) = 1 / (x * y)
+z = cp.multiply(x, y)  
+f_xy = cp.inv_pos(z)
 
-# solve it
-problem = cp.Problem(cp.Minimize(f))
-problem.solve(gp = True)
+# miniminze and set up the problem
+objective = cp.Minimize(f_xy)
+problem = cp.Problem(objective)
 
-# print
-print(f"Optimal x: {x.value}")
-print(f"Optimal y: {y.value}")
-print(f"Objective value: {f.value}")
+# solve the problem following DCP rules
+problem.solve(gp=True)
+
+# Output the solution for x, y, and the function value
+print(f'The Optimal x is {x.value} and the optimal y is {y.value}.')
+print(f"f(x, y) = {f_xy.value}")
 ```
 
 
 (b) $f(x,y) = \sqrt{1+\frac{x^2}{y}}$, with $\mathbf{dom} f = \mathbb{R}\times\mathbb{R}_{++}$ (this means $x$ is any real number and $y$ is strictly greater than 0. 
 
-Problem 3(b) Solution
+### Problem 3(b) Solution
 
 ```{python}
-# load pacakges
+# load packages
 import cvxpy as cp
+import numpy as np
 
 # define variables
 x = cp.Variable() 
 y = cp.Variable(pos=True) 
 
 # define the function f(x, y) = sqrt(1 + x^2 / y)
-f = cp.sqrt(1 + cp.quad_over_lin(x, y))
+z = cp.quad_over_lin(x, y)
+f = cp.sqrt(1 + z)
 
 # solve
 problem = cp.Problem(cp.Minimize(f))
-problem.solve(verbose=True)
+problem.solve(qcp=True)
 
 # print
 print(f"Optimal x: {x.value}")
@@ -118,9 +121,9 @@ Hint: The following atoms may be helpful, there are multiple ways to solve this 
 
 ## Problem 4: Periodic Poisson Regression to predict Car Crashes
 
-For this problem, we will be working with the dataset [nyc_crashes.csv](https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv), which contains a time series of the number of car crashes occurring in Manhattan every hour for a period of time.
+For this problem, we will be working with the dataset [manhattan_crashes.csv](https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv), which contains a time series of the number of car crashes occurring in Manhattan every hour for a period of time.
 
- Here we will develop a Poisson regression model to predict rate of crashes during each time of day. 
+Here we will develop a Poisson regression model to predict rate of crashes during each time of day. 
 
 (a) Consider the following statistical model for the number of crashes $N_i$ during hour $i$ of a given day.
 
@@ -149,7 +152,17 @@ where $\log(\lambda)$ is interpreted as a vector whose $i$th entry is $\log(\lam
 
 Show that $L(C|\lambda)$ is a convex function of the coefficients $\lambda$ on the domain $\lambda \in \mathbb{R}^{24}_{++}$.
 
-Problem 4(a) Solution
+(b) The log-likelihood function $L$ can be minimized to find the maximum likelihood estimate for the $\lambda$ coefficients. Formulate this constrained optimization problem in `CVX`
+and solve it for the NYC crashes dataset, that is solve:
+
+$$
+\min_{\lambda} L(C|\lambda) \\
+\lambda \in \mathbb{R}^{24}_{+}
+$$
+
+ Make a plot of the $\lambda$ coefficients
+
+### Problem 4(a) and 4(b) Solution
 
 ```{python}
 # load packages
@@ -161,19 +174,39 @@ crash_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spr
 
 crash_data = pd.read_csv(crash_url)
 
+# define variables
+C = crash_data.values
+N, T = C.shape
+
+# Define the optimization variable (lambda) which represents the rate parameters for each hour
+lambda_var = cp.Variable(T, pos=True)  # 24 variables for each hour
+
+# Define the log-likelihood function
+log_likelihood = N * cp.sum(lambda_var) - cp.sum(C * cp.log(lambda_var))
+
+# Define the objective function (minimize the negative log-likelihood)
+objective = cp.Minimize(log_likelihood)
+
+# Formulate the problem
+problem = cp.Problem(objective)
+
+# Solve the problem
+problem.solve()
+
+# Get the optimal values for lambda
+lambda_opt = lambda_var.value
+
+# Print the result
+print("Optimal lambda values:", lambda_opt)
+
+# Plot the lambda values
+plt.plot(np.arange(T), lambda_opt, marker='o')
+plt.xlabel("Hour of the Day")
+plt.ylabel("Estimated Crash Rate (lambda)")
+plt.title("Estimated Crash Rate for Each Hour of the Day")
+plt.grid(True)
+plt.show()
 ```
-
-(b) The log-likelihood function $L$ can be minimized to find the maximum likelihood estimate for the $\lambda$ coefficients. Formulate this constrained optimization problem in `CVX`
-and solve it for the NYC crashes dataset, that is solve:
-
-$$
-\min_{\lambda} L(C|\lambda) \\
-\lambda \in \mathbb{R}^{24}_{+}
-$$
-
- Make a plot of the $\lambda$ coefficients
-
-Problem 4(b) Solution
 
 
 
@@ -187,7 +220,47 @@ $$
 
 Assuming that $\rho>0$, show that $L_{pen}(C|\lambda)$ is a convex function on $\mathbb{R}^{24}_{++}$ 
 
-Problem 4(c) Solution
+### Problem 4(c) Solution
+
+```{python}
+# Define the regularization term (penalty for difference between adjacent hours)
+S = np.zeros((T, T))  # T x T matrix for differences between adjacent lambda values
+for i in range(T):
+    if i == 0:
+        S[i, i] = 1
+        S[i, T-1] = -1
+    else:
+        S[i, i] = 1
+        S[i, i-1] = -1
+
+S = cp.Constant(S)  # Convert to a CVXPY constant
+
+# Define the regularization penalty
+rho = cp.Parameter(nonneg=True)  # Regularization parameter rho
+regularization = rho * cp.sum_squares(S @ lambda_var)
+
+# Define the objective function with the regularization term
+regularized_objective = cp.Minimize(log_likelihood + regularization)
+
+# Formulate the problem
+regularized_problem = cp.Problem(regularized_objective)
+
+# Solve the problem for different values of rho
+rho_values = [0.1, 1, 10, 100]
+for rho_val in rho_values:
+    rho.value = rho_val
+    regularized_problem.solve()
+    
+    # Plot the lambda values for each rho
+    plt.plot(np.arange(T), lambda_var.value, label=f"rho = {rho_val}")
+
+plt.xlabel("Hour of the Day")
+plt.ylabel("Estimated Crash Rate (lambda)")
+plt.title("Regularized Estimated Crash Rates for Different Rho Values")
+plt.legend()
+plt.grid(True)
+plt.show()
+```
 
 (d) Formulate the regularized maximum likelihood problem:
 
@@ -198,8 +271,11 @@ $$
 
 and solve it using `CVX`. Solve it for a range of positive values $\rho$ such that for your smallest values the solution appears like your solution to (b) and for your largest values the $\lambda$ show much less variation over time.
 
-Problem 4(d) Solution
+### Problem 4(d) Solution
 
+```{python}
+
+```
 
 Hint: There are many ways to implement this penalty term in `cvx`. A way that you might find useful is to define a matrix $S$ where $S_{ii} = 1$, $S_{i,i-1} = -1$ for $i>1$ and $S_{1,24}=-1$, with $S=0$ for all other entries:
 

@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -115,8 +149,9 @@ window.Quarto = {
 <figcaption>Level Curves of <span class="math inline">\(f\)</span></figcaption>
 </figure>
 </div>
-<p>Part A Solution</p>
-<p>The first function appears to be a quasiconvex because the sublevel sets appear to be convex. It is definitely not concave or quasiconcave because the superlevel sets are not convex. For second function,</p>
+<section id="problem-1a-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-1a-solution">Problem 1(a) Solution</h3>
+<p>The first function appears to be a quasiconvex or convex because the sublevel sets appear to be convex. It is definitely not concave or quasiconcave because the superlevel sets appears not to be convex.</p>
 <ol start="2" type="a">
 <li>The figure below shows level sets for a different function <span class="math inline">\(g\)</span>. Again determine whether it is possible for the function <span class="math inline">\(g\)</span> to be convex, concave, quasiconvex, or quasiconcave. Note: it may be that several options are possible, that one is possible, or that none at all are.</li>
 </ol>
@@ -126,6 +161,11 @@ window.Quarto = {
 <figcaption>Level Curves of <span class="math inline">\(g\)</span></figcaption>
 </figure>
 </div>
+</section>
+<section id="problem-1b-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-1b-solution">Problem 1(b) Solution</h3>
+<p>For this funcion, it appears not to be convex, concave, quasiconvex, or quasiconcave. The reason why</p>
+</section>
 </section>
 <section id="problem-2-cvx-book-extended-exercises-3.1" class="level2">
 <h2 class="anchored" data-anchor-id="problem-2-cvx-book-extended-exercises-3.1">Problem 2: (CVX Book Extended Exercises 3.1)</h2>
@@ -137,14 +177,83 @@ window.Quarto = {
 <li><span class="math inline">\(f(x,y) = \sqrt{x\min(y,2)}\)</span>, with <span class="math inline">\(\mathbf{dom} f = \{(x,y)\,|\, x\geq 0\, , y\geq 0\}\)</span> (i.e.&nbsp;<span class="math inline">\(\mathbb{R}^2_+\)</span>)</li>
 <li><span class="math inline">\(f(x,y) = \left(\sqrt{x} +\sqrt{y}\right)^2\)</span> with <span class="math inline">\(\mathbf{dom} f = \{(x,y)\,|\, x\geq 0\,,\, y\geq 0\}\)</span> (i.e.&nbsp;<span class="math inline">\(\mathbb{R}^2_+\)</span>)</li>
 </ol>
+<section id="problem-2-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-2-solution">Problem 2 Solution</h3>
+<ol type="a">
+<li>This function is convex.</li>
+<li>This function is not convex or concave.</li>
+<li>This function is convex.</li>
+<li>This function is convex.</li>
+<li>This function is convex.</li>
+</ol>
+</section>
 </section>
 <section id="problem-3-selected-from-cvx-book-extended-exercises-3.51-3.52" class="level2">
 <h2 class="anchored" data-anchor-id="problem-3-selected-from-cvx-book-extended-exercises-3.51-3.52">Problem 3: (Selected from CVX Book Extended Exercises 3.51-3.52)</h2>
 <p>For each of the following problems implement the following functions using Disciplined Convex Programming and CVX, and use CVX to verify that they are convex</p>
 <ol type="a">
-<li><p><span class="math inline">\(f(x,y) = \frac{1}{xy}\)</span>, with <span class="math inline">\(\mathbf{dom} f = \mathbb{R}^2_{++}\)</span>. Hint: Use the Atoms listed below part (b) as well as addition, subtraction, and scalar multiplication. There are multiple ways to solve this problem.</p></li>
-<li><p><span class="math inline">\(f(x,y) = \sqrt{1+\frac{x^2}{y}}\)</span>, with <span class="math inline">\(\mathbf{dom} f = \mathbb{R}\times\mathbb{R}_{++}\)</span> (this means <span class="math inline">\(x\)</span> is any real number and <span class="math inline">\(y\)</span> is strictly greater than 0.</p></li>
+<li><span class="math inline">\(f(x,y) = \frac{1}{xy}\)</span>, with <span class="math inline">\(\mathbf{dom} f = \mathbb{R}^2_{++}\)</span>. Hint: Use the Atoms listed below part (b) as well as addition, subtraction, and scalar multiplication. There are multiple ways to solve this problem.</li>
 </ol>
+<section id="problem-3a-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-3a-solution">Problem 3(a) Solution</h3>
+<div id="7429af60" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import packages</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cvxpy <span class="im">as</span> cp</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># define variables</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> cp.Variable(pos<span class="op">=</span><span class="va">True</span>)  <span class="co"># x &gt; 0</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> cp.Variable(pos<span class="op">=</span><span class="va">True</span>)  <span class="co"># y &gt; 0</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># define the objective function f(x, y) = 1 / (x * y)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>function <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (x <span class="op">*</span> y)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> cp.inv_pos(function)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># solve it</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>problem <span class="op">=</span> cp.Problem(cp.Minimize(f))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>problem.solve(gp<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># print</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Optimal x: </span><span class="sc">{</span>x<span class="sc">.</span>value<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Optimal y: </span><span class="sc">{</span>y<span class="sc">.</span>value<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Objective value: </span><span class="sc">{</span>f<span class="sc">.</span>value<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimal x: None
+Optimal y: None
+Objective value: None</code></pre>
+</div>
+</div>
+<ol start="2" type="a">
+<li><span class="math inline">\(f(x,y) = \sqrt{1+\frac{x^2}{y}}\)</span>, with <span class="math inline">\(\mathbf{dom} f = \mathbb{R}\times\mathbb{R}_{++}\)</span> (this means <span class="math inline">\(x\)</span> is any real number and <span class="math inline">\(y\)</span> is strictly greater than 0.</li>
+</ol>
+</section>
+<section id="problem-3b-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-3b-solution">Problem 3(b) Solution</h3>
+<div id="f47d3bf7" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load packages</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cvxpy <span class="im">as</span> cp</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># define variables</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> cp.Variable() </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> cp.Variable(pos<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># define the function f(x, y) = sqrt(1 + x^2 / y)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> cp.sqrt(<span class="dv">1</span> <span class="op">+</span> cp.quad_over_lin(x<span class="op">**</span><span class="dv">2</span>, y))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># solve</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>problem <span class="op">=</span> cp.Problem(cp.Minimize(function))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>problem.solve(gp<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># print</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Optimal x: </span><span class="sc">{</span>x<span class="sc">.</span>value<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Optimal y: </span><span class="sc">{</span>y<span class="sc">.</span>value<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Objective value: </span><span class="sc">{</span>f<span class="sc">.</span>value<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimal x: None
+Optimal y: None
+Objective value: None</code></pre>
+</div>
+</div>
 <p>Hint: The following atoms may be helpful, there are multiple ways to solve this problem.</p>
 <ul>
 <li><code>inv_pos(u)</code>, which is <span class="math inline">\(1/u\)</span>, with domain <span class="math inline">\(\mathbb{R}_{++}\)</span></li>
@@ -155,24 +264,29 @@ window.Quarto = {
 <li><code>norm2(u,v)</code>, which is <span class="math inline">\(\sqrt{u^2 + v^2}\)</span> , with domain <span class="math inline">\(\mathbb{R}^2\)</span>.</li>
 </ul>
 </section>
+</section>
 <section id="problem-4-periodic-poisson-regression-to-predict-car-crashes" class="level2">
 <h2 class="anchored" data-anchor-id="problem-4-periodic-poisson-regression-to-predict-car-crashes">Problem 4: Periodic Poisson Regression to predict Car Crashes</h2>
-<p>For this problem, we will be working with the dataset <a href="https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/nyc_crashes.csv">nyc_crashes.csv</a>, which contains a time series of the number of car crashes occurring in Manhattan every hour for a period of time. Here we will develop a Poisson regression model to predict rate of crashes during each time of day.</p>
+<p>For this problem, we will be working with the dataset <a href="https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv">manhattan_crashes.csv</a>, which contains a time series of the number of car crashes occurring in Manhattan every hour for a period of time.</p>
+<p>Here we will develop a Poisson regression model to predict rate of crashes during each time of day.</p>
 <ol type="a">
 <li>Consider the following statistical model for the number of crashes <span class="math inline">\(N_i\)</span> during hour <span class="math inline">\(i\)</span> of a given day.</li>
 </ol>
 <p><span class="math display">\[
 N_i \sim \exp(-\lambda_i)\frac{\lambda_i^{N_i}}{{N_i}!}
 \]</span></p>
-<p>where <span class="math inline">\(i\)</span> ranges from <span class="math inline">\(0\)</span> to <span class="math inline">\(23\)</span> and corresponds to the hour of the day. Suppose that we have a dataset of counts for crashes where <span class="math inline">\(C_{ni}\)</span> is the number of crashes that occur in the <span class="math inline">\(i\)</span>th hour of the <span class="math inline">\(n\)</span>th day. Then the <code>log</code> likelihood function for the parameters <span class="math inline">\(\lambda\)</span> is: <span class="math display">\[
+<p>where <span class="math inline">\(i\)</span> ranges from <span class="math inline">\(0\)</span> to <span class="math inline">\(23\)</span> and corresponds to the hour of the day. Suppose that we have a dataset of counts for crashes where <span class="math inline">\(C_{ni}\)</span> is the number of crashes that occur in the <span class="math inline">\(i\)</span>th hour of the <span class="math inline">\(n\)</span>th day. Then the <code>log</code> likelihood function for the parameters <span class="math inline">\(\lambda\)</span> is:</p>
+<p><span class="math display">\[
 - \log(p(C|\lambda)) = \sum_{n=1}^N \sum_{i=0}^{23} \left( \lambda_i - C_{ni}\log(\lambda_i) + \log(C_{ni}!)\right)
 \]</span></p>
 <p>However, we can drop terms terms that don’t depend on <span class="math inline">\(\lambda\)</span> because they will have no impact on the maximum likelihood solution. This lets us form a simpler objective function:</p>
 <p><span class="math display">\[
 L(C|\lambda) = \sum_{n=1}^N\sum_{i=0}^{23} \left(\lambda_i - C_{ni}\log(\lambda_i)\right)
-\]</span> or if we use matrix-vector notation: <span class="math display">\[
+\]</span> or if we use matrix-vector notation:</p>
+<p><span class="math display">\[
 L(C|\lambda) = N\mathbf{1}^T\lambda - \mathbf{1}^T C \log(\lambda)
-\]</span> where <span class="math inline">\(\log(\lambda)\)</span> is interpreted as a vector whose <span class="math inline">\(i\)</span>th entry is <span class="math inline">\(\log(\lambda_i)\)</span> and the vector <span class="math inline">\(\mathbf{1}^T\)</span> has all entries equal to <span class="math inline">\(1\)</span> and has the right dimension in each case to make the resulting expressions scalars (24 and <span class="math inline">\(N\)</span>, for our dataset <span class="math inline">\(N\)</span> will be 43).</p>
+\]</span></p>
+<p>where <span class="math inline">\(\log(\lambda)\)</span> is interpreted as a vector whose <span class="math inline">\(i\)</span>th entry is <span class="math inline">\(\log(\lambda_i)\)</span> and the vector <span class="math inline">\(\mathbf{1}^T\)</span> has all entries equal to <span class="math inline">\(1\)</span> and has the right dimension in each case to make the resulting expressions scalars (24 and <span class="math inline">\(N\)</span>, for our dataset <span class="math inline">\(N\)</span> will be 43).</p>
 <p>Show that <span class="math inline">\(L(C|\lambda)\)</span> is a convex function of the coefficients <span class="math inline">\(\lambda\)</span> on the domain <span class="math inline">\(\lambda \in \mathbb{R}^{24}_{++}\)</span>.</p>
 <ol start="2" type="a">
 <li>The log-likelihood function <span class="math inline">\(L\)</span> can be minimized to find the maximum likelihood estimate for the <span class="math inline">\(\lambda\)</span> coefficients. Formulate this constrained optimization problem in <code>CVX</code> and solve it for the NYC crashes dataset, that is solve:</li>
@@ -182,12 +296,29 @@ L(C|\lambda) = N\mathbf{1}^T\lambda - \mathbf{1}^T C \log(\lambda)
 \lambda \in \mathbb{R}^{24}_{+}
 \]</span></p>
 <p>Make a plot of the <span class="math inline">\(\lambda\)</span> coefficients</p>
+<section id="problem-4a-and-4b-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-4a-and-4b-solution">Problem 4(a) and 4(b) Solution</h3>
+<div id="ee2dd4ca" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load packages</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cvxpy <span class="im">as</span> cp</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># extract data</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>crash_url <span class="op">=</span> <span class="st">'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv'</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>crash_data <span class="op">=</span> pd.read_csv(crash_url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <ol start="3" type="a">
-<li>It would be reasonable to expect that the rate of crashes in two adjacent hours should be similar, i.e.&nbsp;the observation that there has been a crash at 3:01PM should influence the estimate of the rate of crashes between 2:00PM and 3:00PM in addition to between 3:00PM and 4:00PM. One way to implement this is through the following regularization term, which applies a penalty proportional to the square of the difference between <span class="math inline">\(\lambda_i\)</span> and <span class="math inline">\(\lambda_{i+1}\)</span>: <span class="math display">\[
-L_{pen}(C|\lambda,\rho) = L(C|\lambda) + \rho\left( \sum_{i=1}^{23} (\lambda_i-\lambda_{i-1})^2 + (\lambda_0-\lambda_{23})^2\right)
-\]</span></li>
+<li>It would be reasonable to expect that the rate of crashes in two adjacent hours should be similar, i.e.&nbsp;the observation that there has been a crash at 3:01PM should influence the estimate of the rate of crashes between 2:00PM and 3:00PM in addition to between 3:00PM and 4:00PM.</li>
 </ol>
+<p>One way to implement this is through the following regularization term, which applies a penalty proportional to the square of the difference between <span class="math inline">\(\lambda_i\)</span> and <span class="math inline">\(\lambda_{i+1}\)</span>:</p>
+<p><span class="math display">\[
+L_{pen}(C|\lambda,\rho) = L(C|\lambda) + \rho\left( \sum_{i=1}^{23} (\lambda_i-\lambda_{i-1})^2 + (\lambda_0-\lambda_{23})^2\right)
+\]</span></p>
 <p>Assuming that <span class="math inline">\(\rho&gt;0\)</span>, show that <span class="math inline">\(L_{pen}(C|\lambda)\)</span> is a convex function on <span class="math inline">\(\mathbb{R}^{24}_{++}\)</span></p>
+</section>
+<section id="problem-4c-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-4c-solution">Problem 4(c) Solution</h3>
 <ol start="4" type="a">
 <li>Formulate the regularized maximum likelihood problem:</li>
 </ol>
@@ -196,8 +327,12 @@ L_{pen}(C|\lambda,\rho) = L(C|\lambda) + \rho\left( \sum_{i=1}^{23} (\lambda_i-\
 \lambda \in \mathbb{R}^{24}_{+} \\
 \]</span></p>
 <p>and solve it using <code>CVX</code>. Solve it for a range of positive values <span class="math inline">\(\rho\)</span> such that for your smallest values the solution appears like your solution to (b) and for your largest values the <span class="math inline">\(\lambda\)</span> show much less variation over time.</p>
+</section>
+<section id="problem-4d-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-4d-solution">Problem 4(d) Solution</h3>
 <p>Hint: There are many ways to implement this penalty term in <code>cvx</code>. A way that you might find useful is to define a matrix <span class="math inline">\(S\)</span> where <span class="math inline">\(S_{ii} = 1\)</span>, <span class="math inline">\(S_{i,i-1} = -1\)</span> for <span class="math inline">\(i&gt;1\)</span> and <span class="math inline">\(S_{1,24}=-1\)</span>, with <span class="math inline">\(S=0\)</span> for all other entries:</p>
 <p>Then <span class="math inline">\(S\lambda = \begin{bmatrix} [(\lambda_1 - \lambda_{24}) &amp; (\lambda_2-\lambda_1) &amp; \cdots &amp; (\lambda_{24}-\lambda_{23}) \end{bmatrix}^T\)</span>, and you can use <code>cvx.square</code> and <code>cvx.sum</code> to construct the objective.</p>
+</section>
 </section>
 
 </main>
