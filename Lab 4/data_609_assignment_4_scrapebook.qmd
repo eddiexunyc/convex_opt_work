@@ -185,18 +185,15 @@ import matplotlib.pyplot as plt
 crash_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv'
 
 crash_data = pd.read_csv(crash_url)
-crash_data_revised = crash_data.drop(columns = ['date', 'day'], axis=1, inplace=True)
+crash_data_revised = crash_data.drop(columns = ['date', 'day'], axis=1)
 
 # define variables
-# C = crash_data_revised.values
-# N, T = C.shape
-print(crash_data)
-```
+C = crash_data_revised.values
+N, T = C.shape
 
-```{python}
 # define lambda
 lambda_ = cp.Variable(T, pos=True) 
-L = N * cp.sum(lambda_) - cp.sum(bike_crash_arr * cp.log(lambda_))
+L = N * cp.sum(lambda_) - cp.sum(C * cp.log(lambda_))
 
 # formulate the problem: minimize the negative log-likelihood
 problem = cp.Problem(cp.Minimize(L))
@@ -204,20 +201,12 @@ problem = cp.Problem(cp.Minimize(L))
 # solve the problem
 problem.solve()
 
-# Check the result
-if problem.status == cp.OPTIMAL:
-    print("Optimal solution found:")
-    print("Estimated λ values: ", lambda_.value)
-else:
-    print("No optimal solution found.")
-
 # Plot the estimated λ values
-hours = np.arange(24)
+hours = 24
 plt.plot(hours, lambda_.value, marker='o')
 plt.title('Estimated Crash Rates (λ) for Each Hour of the Day')
 plt.xlabel('Hour of the Day')
 plt.ylabel('Estimated λ (Crash Rate)')
-plt.grid(True)
 plt.xticks(hours)
 plt.show()
 ```
