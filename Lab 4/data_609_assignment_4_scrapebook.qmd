@@ -85,7 +85,6 @@ print(f'The Optimal x is {x.value} and the optimal y is {y.value}.')
 print(f"f(x, y) = {f_xy.value}")
 ```
 
-
 (b) $f(x,y) = \sqrt{1+\frac{x^2}{y}}$, with $\mathbf{dom} f = \mathbb{R}\times\mathbb{R}_{++}$ (this means $x$ is any real number and $y$ is strictly greater than 0. 
 
 ### Problem 3(b) Solution
@@ -153,6 +152,7 @@ However, we can drop terms terms that don't depend on $\lambda$ because they wil
 $$
 L(C|\lambda) = \sum_{n=1}^N\sum_{i=0}^{23} \left(\lambda_i - C_{ni}\log(\lambda_i)\right)
 $$
+
 or if we use matrix-vector notation:
 
 $$
@@ -163,7 +163,7 @@ where $\log(\lambda)$ is interpreted as a vector whose $i$th entry is $\log(\lam
 
 Show that $L(C|\lambda)$ is a convex function of the coefficients $\lambda$ on the domain $\lambda \in \mathbb{R}^{24}_{++}$.
 
-(b) The log-likelihood function $L$ can be minimized to find the maximum likelihood estimate for the $\lambda$ coefficients. Formulate this constrained optimization problem in `CVX` and solve it for the NYC crashes dataset, that is solve:
+(b) The log-likelihood function $L$ can be minimized to find the maximum likelihood estimate for the $\lambda$ coefficients. Formulate this constrained optimization problem in `CVX` and solve it for the crashes dataset, that is solve:
 
 $$
 \min_{\lambda} L(C|\lambda) \\
@@ -172,8 +172,6 @@ $$
 
 Make a plot of the $\lambda$ coefficients
 
-### Problem 4(a) and 4(b) Solution
-
 ```{python}
 # load packages
 import cvxpy as cp
@@ -181,33 +179,37 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# extract data
+# load the dataset and extract hours and numbers of crashes
 crash_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv'
-
 crash_data = pd.read_csv(crash_url)
-crash_data_revised = crash_data.drop(columns = ['date', 'day'], axis=1)
 
-# define variables
-C = crash_data_revised.values
-N, T = C.shape
+# convert the data into matrix group by the date and hour
+crash_matrix = crash_data.pivot_table(index='date', columns='hour', values='Num_Crashes', aggfunc='sum', fill_value=0)
 
-# define lambda
-lambda_ = cp.Variable(T, pos=True) 
+# convert to a numpy matrix for further operations if needed
+C = crash_matrix.to_numpy()
+
+# get the shape
+N, M = crash_matrix.shape
+
+# define optimization variable λ (rates for each hour)
+lambda_ = cp.Variable(M, pos=True)
+
+# define the log-likelihood function
 L = N * cp.sum(lambda_) - cp.sum(C * cp.log(lambda_))
 
-# formulate the problem: minimize the negative log-likelihood
+# create the optimization problem
 problem = cp.Problem(cp.Minimize(L))
 
 # solve the problem
 problem.solve()
 
-# Plot the estimated λ values
-hours = 24
-plt.plot(hours, lambda_.value, marker='o')
-plt.title('Estimated Crash Rates (λ) for Each Hour of the Day')
+# Plot the λ values (estimated crash rates)
+plt.plot(range(M), lambda_.value, marker='o')
+plt.title('Estimated Crash Rates in 24 hours')
 plt.xlabel('Hour of the Day')
-plt.ylabel('Estimated λ (Crash Rate)')
-plt.xticks(hours)
+plt.ylabel('Estimated λ')
+plt.xticks(range(M))
 plt.show()
 ```
 
@@ -221,48 +223,6 @@ $$
 
 Assuming that $\rho>0$, show that $L_{pen}(C|\lambda)$ is a convex function on $\mathbb{R}^{24}_{++}$ 
 
-### Problem 4(c) Solution
-
-```{python}
-# Define the regularization term (penalty for difference between adjacent hours)
-S = np.zeros((T, T))  # T x T matrix for differences between adjacent lambda values
-for i in range(T):
-    if i == 0:
-        S[i, i] = 1
-        S[i, T-1] = -1
-    else:
-        S[i, i] = 1
-        S[i, i-1] = -1
-
-S = cp.Constant(S)  # Convert to a CVXPY constant
-
-# Define the regularization penalty
-rho = cp.Parameter(nonneg=True)  # Regularization parameter rho
-regularization = rho * cp.sum_squares(S @ lambda_var)
-
-# Define the objective function with the regularization term
-regularized_objective = cp.Minimize(log_likelihood + regularization)
-
-# Formulate the problem
-regularized_problem = cp.Problem(regularized_objective)
-
-# Solve the problem for different values of rho
-rho_values = [0.1, 1, 10, 100]
-for rho_val in rho_values:
-    rho.value = rho_val
-    regularized_problem.solve()
-    
-    # Plot the lambda values for each rho
-    plt.plot(np.arange(T), lambda_var.value, label=f"rho = {rho_val}")
-
-plt.xlabel("Hour of the Day")
-plt.ylabel("Estimated Crash Rate (lambda)")
-plt.title("Regularized Estimated Crash Rates for Different Rho Values")
-plt.legend()
-plt.grid(True)
-plt.show()
-```
-
 (d) Formulate the regularized maximum likelihood problem:
 
 $$
@@ -272,13 +232,70 @@ $$
 
 and solve it using `CVX`. Solve it for a range of positive values $\rho$ such that for your smallest values the solution appears like your solution to (b) and for your largest values the $\lambda$ show much less variation over time.
 
-### Problem 4(d) Solution
-
 ```{python}
+import cvxpy as cp
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
+# load the dataset and extract hours and numbers of crashes
+crash_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/manhattan_crashes.csv'
+crash_data = pd.read_csv(crash_url)
+
+# convert the data into matrix group by the date and hour
+crash_matrix = crash_data.pivot_table(index='date', columns='hour', values='Num_Crashes', aggfunc='sum', fill_value=0)
+
+# convert to a numpy matrix for further operations if needed
+C = crash_matrix.to_numpy()
+
+# get the shape
+N, M = crash_matrix.shape
+
+# define optimization variable λ (rates for each hour)
+lambda_ = cp.Variable(M, pos=True)
+
+# Define the regularization matrix S (differences between adjacent hours)
+S = np.zeros((M, M))
+for i in range(M-1):
+    S[i, i] = 1
+    S[i, i+1] = -1
+S[0, M-1] = -1
+S[M-1, 0] = 1
+S = cp.Constant(S)
+
+# define the log-likeihood
+L = N * cp.sum(lambda_) - cp.sum(C * cp.log(lambda_))
+
+# define the regularization
+rho = cp.Parameter(nonneg=True)
+regularization = rho * cp.sum_squares(S @ lambda_)
+
+# define the optimization problem with regularization
+objective = cp.Minimize(L + regularization)
+problem = cp.Problem(objective)
+
+# solve the proble for every range of P
+rho_values = [0.1, 1, 10]
+lambda_values = []
+
+for r in rho_values:
+    rho.value = r
+    problem.solve()
+    lambda_values.append(lambda_.value)
+
+# plot the lamda values for each ρ
+plt.figure(figsize=(10, 6))
+for i, r in enumerate(rho_values):
+    plt.plot(range(M), lambda_values[i], marker='o', label=f'ρ = {r}')
+
+plt.title('Estimated Crash Rates for Each Hour of the Day with Regularization')
+plt.xlabel('Hour')
+plt.ylabel('Estimated λ')
+plt.xticks(range(M))
+plt.legend()
+plt.show()
 ```
 
 Hint: There are many ways to implement this penalty term in `cvx`. A way that you might find useful is to define a matrix $S$ where $S_{ii} = 1$, $S_{i,i-1} = -1$ for $i>1$ and $S_{1,24}=-1$, with $S=0$ for all other entries:
 
-Then $S\lambda = \begin{bmatrix} [(\lambda_1 - \lambda_{24}) & (\lambda_2-\lambda_1) & \cdots & (\lambda_{24}-\lambda_{23}) \end{bmatrix}^T$, and you can
-use `cvx.square` and `cvx.sum` to construct the objective. 
+Then $S\lambda = \begin{bmatrix} [(\lambda_1 - \lambda_{24}) & (\lambda_2-\lambda_1) & \cdots & (\lambda_{24}-\lambda_{23}) \end{bmatrix}^T$, and you can use `cvx.square` and `cvx.sum` to construct the objective. 
