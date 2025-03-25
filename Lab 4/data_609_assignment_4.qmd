@@ -261,9 +261,6 @@ S = np.zeros((M, M))
 for i in range(M-1):
     S[i, i] = 1
     S[i, i+1] = -1
-S[0, M-1] = -1
-S[M-1, 0] = 1
-S = cp.Constant(S)
 
 # define the log-likeihood function
 L = N * cp.sum(lambda_) - cp.sum(C * cp.log(lambda_))
