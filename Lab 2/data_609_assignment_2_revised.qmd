@@ -8,8 +8,7 @@ editor: source
 
 ## Instructions
 
-Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file,
-I recommend python, julia, or R. 
+Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file, I recommend python, julia, or R. 
 
 ## Problem 1: Online Updating for Least Squares and Autoregressive Time Series Models
 
@@ -93,6 +92,8 @@ In python, `a @ a.T` will be an 8x8 matrix if `a.shape = (8,1)`. However, by def
 
 Use least squares optimization to fit an autoregressive time series model, replacing $T$ with the value of your new feature $f(T)$ in the time series. How does the temperature dependence coefficient differ between this model and the one you fit in (a)? Does the accuracy of the model improve or get worse using the new feature?
 
+### Problem 1(a) and 1(b) Solution
+
 ```{python}
 # load dependencies
 import numpy as np
@@ -158,8 +159,6 @@ plt.ylabel('R^2')
 plt.title('R^2 over Time')
 plt.show()
 
-## Part B
-
 # calculate the nonlinear temperature
 nonlinear_temp = (temp - 25) ** 2
 
@@ -197,19 +196,20 @@ r_squared_nonlinear = np.array(r_squared_nonlinear)
 
 # plot
 plt.figure(figsize=(12, 6))
-plt.plot(coeff_nonlinear[:, :-1])  # Plot only C_1 to C_7
+plt.plot(coeff_nonlinear[:, :-1]) 
 plt.title('Coefficients (Nonlinear Model [First 7 days]) over Time')
 plt.xlabel('Time')
 plt.ylabel('Coefficient Value')
 
-plt.plot(coeff_nonlinear[:, -1], label='(Nonlinear)')  # Plot C_T
+# plot coefficient
+plt.plot(coeff_nonlinear[:, -1], label='(Nonlinear)')  
 plt.title('Coefficient C_T (Nonlinear) over Time')
 plt.xlabel('Time')
 plt.ylabel('Coefficient Value')
 plt.tight_layout()
 plt.show()
 
-# Plot R-squared for nonlinear model
+# plot R-squared for nonlinear model
 plt.figure(figsize=(12, 6))
 plt.plot(r_squared_nonlinear)
 plt.title('R-squared (Nonlinear Model) over Time')
@@ -230,6 +230,8 @@ The file [social-mobility.csv](https://github.com/georgehagstrom/DATA609Spring20
 (c) Use weighted least squares to calculate an estimate of how social mobility depends on commute time and student-teacher ratio, using weights calculated based on the variance estimate derived in (b).
 
 Compare the coefficients to those derived from ordinary least squares with no weights.
+
+### Problem 2(a) and 2(b) Solution
 
 ```{python}
 # load dependencies
@@ -256,13 +258,13 @@ plt.title('Social Mobility vs Log(Population)')
 plt.show()
 ```
 
-Problem 2 Part b Solution
-
 The binomial distribution formula is defined below:
 
 $$
 Variance = n * p * (1 - p)
 $$
+
+### Problem 2(c) Solution
 
 ```{python}
 # load dependencies
