@@ -1,0 +1,482 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={DATA 609 - Homework 5: Disciplined Convex Programming and Data Fitting},
+  pdfauthor={Eddie Xu},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{DATA 609 - Homework 5: Disciplined Convex Programming and Data
+Fitting}
+\author{Eddie Xu}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\subsection{Instructions}\label{instructions}
+
+Please submit a .qmd file along with a rendered pdf to the Brightspace
+page for this assignment. You may use whatever language you like within
+your qmd file, I recommend python, julia, or R.
+
+\subsection{Problem 1: Penalty Function Approximations (Modified from
+Exercise 4 in CVX Book Extended
+Exercises)}\label{problem-1-penalty-function-approximations-modified-from-exercise-4-in-cvx-book-extended-exercises}
+
+Consider the approximation problem: \[
+\min_{\mathbf{x}\in\mathbb{R}^n} \phi\left(A\mathbf{x}-\mathbf{b}\right),
+\]
+
+where \(A\) is an \(m\times n\) matrix, \(x\in\mathbb{R}^n\), and
+\(\phi: \mathbb{R}^m\to\mathbb{R}\) is a convex penalty function
+measuring the approximation error, and \(\mathbf{b}\) is an
+\(m\)-vector.
+
+The purpose of this exercise is for you to implement several different
+penalty functions in \texttt{CVX} and study how the resulting
+coefficients \(x\) from each penalty function differ, as a means of
+building intuition about penalty functions.
+
+You will use the following penalty functions:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  \(\phi(\mathbf{y}) = \|y\|_2\), the standard Euclidean norm
+\item
+  \(\phi(\mathbf{y}) = \|y\|_1\), the \(L_1\) norm. This is often
+  referred to as the Lasso
+\item
+  \(\phi(\mathbf{y}) = \sum_{k=1}^{m/2} |y_{r_k}|\), where \(r_k\) is
+  the index of the component with the \(k\)th largest absolute value.
+  This is like the Lasso, but where we only count the terms with their
+  error in the top half, i.e.~\(y_{r_1}\) is the \(y\) with largest
+  absolute value, \(y_{r_2}\) is the \(y\) with second largest absolute
+  value, etc.
+\item
+  \(\phi(\mathbf{y}) = \sum_{k=1}^m h(y_k)\), where \(h(y)\) is the
+  Huber penalty, defined by:
+\end{enumerate}
+
+\[
+h(u) = \begin{cases} u^2,\, |u|\leq M \\
+ M(2|u|-M),\, |u|\geq M,
+\end{cases}
+\] For this problem use \(M=0.2\)
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  \(\phi(\mathbf{y}) = \sum_{k=1}^m h(y_k)\), where \(h\) is the
+  log-barrier penalty, defined by: \[
+  h(u) = -\log(1-u^2),\quad \mathbf{dom}(h) = \{u |\quad|u|< 1 \}
+  \]
+\end{enumerate}
+
+Generate data \(A\) and \(\mathbf{b}\) as follows:
+
+\begin{itemize}
+\tightlist
+\item
+  \(m=200\)
+\item
+  \(n=100\)
+\item
+  \(A_{ij} \sim \mathrm{Normal}(\mu = 0,\sigma = 1)\), each element
+  normally distributed with mean 0 and standard deviation 1
+\item
+  Intialize \(b\) as using a normal distribution of mean \(\mu=0\) and
+  \(\sigma=1\), and then normalize \(b\) so that all of its entries have
+  absolute value less than \(1\) by doing something like:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(b_i \sim Normal(\mu = 0,\sigma = 1)\)
+  \item
+    and then: \texttt{b=b/(1.01\ max(abs(b)))}
+  \end{itemize}
+\end{itemize}
+
+This is to make sure the \texttt{log-barrier} function as a non-empty
+domain.
+
+Visualize the distribution of errors (using a tool like a histogram or
+density plot) for each of these penalty function formulations and
+comment on the differences that you observe. Each penalty function
+prioritizes a errors differently, how do these priorities manifest in
+the distribution of residuals.
+
+Some hints for selected parts:
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  Technically this is a least squares problem, you can solve it using
+  Least-Sqares formula or \texttt{CVX}
+\item
+  Use \texttt{norm(y,1)}
+\item
+  Use \texttt{norm\_largest()}
+\item
+  Use \texttt{huber()}
+\item
+  The extended exercises claimed that the \texttt{log-barrier} objective
+  needed to be reformulated to use the geometric mean, but I found that
+  this problem worked perfectly well with a straightforward
+  implementation. I suspect that the \texttt{CVX} software was upgraded
+  to better handle \texttt{log} and \texttt{exp} objecties since this
+  exercise was developed.
+\end{enumerate}
+
+\subsection{Problem 2: Fitting Censored Data (Extended Exercises 6.13 in
+CVX
+Book)}\label{problem-2-fitting-censored-data-extended-exercises-6.13-in-cvx-book}
+
+In some experiments there are two kinds of measurements or data
+available: The usual ones, in which you get a number (say), and censored
+data, in which you don't get the specific number, but are told something
+about it, such as a lower bound.
+
+A classic example is a study of lifetimes of a set of subjects (say,
+laboratory mice, devices undergoing reliability testing, or people in a
+long-term, longitudinal study). For those who have died by the end of
+data collection, we get the lifetime.
+
+For those who have not died by the end of data collection, we do not
+have the lifetime, but we do have a lower bound, i.e., the length of the
+study. In statistics, we call this type of data \texttt{right-censored}
+data, meaning that we do not have the exact values in the right tail of
+the distribution. The data points that are not present are called the
+censored data values.
+
+We wish to fit a set of data points,
+\(\left((\mathbf{x}_1,y_1), \cdots, (\mathbf{x}_k,y_k)\right)\), with
+\(\mathbf{x}_k \in \mathbb{R}^n\) and \(y_k\in\mathbb{R}\), with a
+linear model of the form \(y ≈ \mathbf{c}^T \mathbf{x}\). The vector
+\(\mathbf{c} \in \mathbf{R}^n\) is the model parameter, which we want to
+choose. We will use a least-squares criterion, i.e., choose
+\(\mathbf{c}\) to minimize:
+
+\[
+J = \sum_{i=1}^k \left(y_i - \mathbf{c}^T\mathbf{x}_i\right)^2
+\]
+
+Here is the tricky part: some of the values of \(y_i\) are censored; for
+these entries, we have only a (given) lower bound.
+
+We will re-order the data so that \(y_1 , \cdots , y_m\) are given
+(i.e., uncensored), while \(y_{m+1} , \cdots y_k\) are all censored,
+i.e., unknown, but larger than D, a given number. All the values of
+\(\mathbf{x}_i\) are known.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\item
+  Explain how to find \(\mathbf{c}\) (the model parameter) and
+  \(y_{m+1} ,\cdots , y_k\) (the censored data values) that minimize
+  \(J\). Hint: should the censored data be variables or parameters?
+\item
+  Carry out the method of part (a) on the data values in the file
+  \href{https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/censored_dict.json}{censored\_dict.json}.
+  You can process this file in \texttt{R} using \texttt{fromJSON} in the
+  \texttt{jsonlite} package or in python using the \texttt{json} library
+  and:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{with} \BuiltInTok{open}\NormalTok{(}\StringTok{\textquotesingle{}censored\_dict.json\textquotesingle{}}\NormalTok{, }\StringTok{\textquotesingle{}r\textquotesingle{}}\NormalTok{) }\ImportTok{as}\NormalTok{ fp:}
+\NormalTok{    data }\OperatorTok{=}\NormalTok{ json.load(fp)}
+\end{Highlighting}
+\end{Shaded}
+
+Report \(\hat{\mathbf{c}}\), the value of \(\mathbf{c}\) found using
+this method.
+
+Also find \(\hat{\mathbf{c}_{ls}}\) , the least-squares estimate of
+\(\mathbf{c}\) obtained by simply ignoring the censored data samples,
+i.e., the least-squares estimate based on the data
+\((\mathbf{x}_1 , y_1 ), \cdots (\mathbf{x}_m , y_m )\).
+
+The data file contains \(\mathbf{c}_{\mathrm{true}}\) , the true value
+of \(\mathbf{c}\), in the vector \(\mathbf{c}_{\mathrm{true}}\). Use
+this to give the two relative errors:
+
+\[
+\frac{\|\mathbf{c}_{\mathrm{true}}- \hat{\mathbf{c}}\|_2^2}{\|\mathbf{c}_{\mathrm{true}}\|_2^2},\quad
+\frac{\|\mathbf{c}_{\mathrm{true}}- \hat{\mathbf{c}_{ls}}\|_2^2}{\|\mathbf{c}_{\mathrm{true}}\|_2^2}
+\]
+
+\subsection{Problem 3: Robust Logistic Regression (Exercise 6.29 in the
+CVX Book extended
+exercises)}\label{problem-3-robust-logistic-regression-exercise-6.29-in-the-cvx-book-extended-exercises}
+
+We are given a data set \(\mathbf{x}_i \in \mathbb{R}^d\) ,
+\(y_i \in \{−1, 1\}, i = 1, \cdots , n\). We seek a prediction model
+\(\hat{y} = \mathrm{sign}(\theta^T \mathbf{x})\), where
+\(\theta \in \mathbb{R}^d\) is the model parameter.
+
+In logistic regression, \(\theta\) is chosen as the minimizer of the
+logistic loss:
+
+\[
+l(\theta) = \sum_{i=1}^n \log\left(1 + \exp\left(-y_i\theta^T\mathbf{x}_i\right)\right)
+\]
+
+which is a convex function of \(\theta\). Here
+\(\|\delta_i\|_{\infty} = \max_j |\delta_{ij}|\). Remember that each
+\(\delta_i\) is a vector with length the same as \(\mathbf{x}_i\).
+
+In robust regression, we take into account the idea that the feature
+vectors \(\mathbf{x}_i\) are not known precisely. Specifically we
+imagine that each entry of each feature vector can vary by
+\(\pm\epsilon\), where \(\epsilon > 0\) is a given uncertainty level.
+
+We define the worst-case logistic loss as:
+
+\[
+l_{wc}(\theta) = \sum_{i=1}^n \sup_{\|\delta_i\|_{\infty}\leq\epsilon}\log\left(1+\exp\left(-y_i\theta^T\left(\mathbf{x}_i+\delta_i\right)\right)\right)
+\]
+
+In words: we perturb each feature vector's entries by up to \(\epsilon\)
+in such a way as to make the logistic loss as large as possible. Each
+term is convex, since it is the supremum of a family of convex functions
+of \(\theta\), and so \(l_{wc}(\theta)\) is a convex function of
+\(\theta\).
+
+In robust logistic regression, we choose \(\theta\) to minimize
+\(l_{wc}(\theta)\).
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\tightlist
+\item
+  Explain how to carry out robust logistic regression by solving a
+  single convex optimization problem in disciplined convex programming
+  (DCP) form. Justify any change of variables or introduction of new
+  variables. Explain why solving the problem you propose also solves the
+  robust logistic regression problem.
+\end{enumerate}
+
+Hint: \(log(1 + exp(u)))\) is monotonic in u.
+
+\begin{enumerate}
+\def\labelenumi{(\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Fit a standard logistic regression model (i.e., minimize
+  \(l(\theta)\)), and also a robust logistic regression model (i.e.,
+  minimize \(l_{wc}(\theta)\)), using the data given in
+  \href{https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/rob_regression.csv}{rob\_regression.csv}
+  and
+  \href{https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/rob_regression_test.csv}{rob\_regression\_test.csv}.
+\end{enumerate}
+
+The \(\mathbf{x}_i\)s are provided as the rows of an \(n \times d\)
+matrix named \(X\) (these are the variables of the data frame named
+``X\_1, X\_2, \ldots{}''). The \(y_i\)s are provided as the entries of a
+\(n\)-vector named \(y\) (the first column in the data frame).
+
+The file also contains a test data set, \(X_{\mathrm{test}}\),
+\(y_{\mathrm{test}}\). Give the test error rate (i.e., fraction of test
+set data points for which \(\hat{y}= y\)) for the logistic regression
+and robust logistic regression models.
+
+
+
+
+\end{document}

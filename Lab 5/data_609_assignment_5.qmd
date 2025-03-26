@@ -1,6 +1,6 @@
 ---
 title: "DATA 609 - Homework 5: Disciplined Convex Programming and Data Fitting"
-format: pdf
+format: html
 editor: source
 author: Eddie Xu
 ---
@@ -15,6 +15,7 @@ Consider the approximation problem:
 $$
 \min_{\mathbf{x}\in\mathbb{R}^n} \phi\left(A\mathbf{x}-\mathbf{b}\right),
 $$
+
 where $A$ is an $m\times n$ matrix, $x\in\mathbb{R}^n$, and $\phi: \mathbb{R}^m\to\mathbb{R}$ is a convex penalty function measuring the approximation error, and $\mathbf{b}$ is an $m$-vector.
 
 The purpose of this exercise is for you to implement several different penalty functions in `CVX` and study how the resulting coefficients $x$ from each penalty function differ, as a means of building intuition about penalty functions.
