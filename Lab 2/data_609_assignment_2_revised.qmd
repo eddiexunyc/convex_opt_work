@@ -5,14 +5,13 @@ format: html
 editor: source
 ---
 
-
 ## Instructions
 
 Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file, I recommend python, julia, or R. 
 
 ## Problem 1: Online Updating for Least Squares and Autoregressive Time Series Models
 
-Many applications of least squares (and other statistical methods) involve \emph{streaming data}, in which data is collected over a time period and the statistical model is updated as new data arrives. If the quantity of data arriving is very large, it may be inefficient or even impossible to refit the entire model on the entire dataset. Instead, we use techniques (often referred to as \emph{online learning} which take the current model as a starting point and update them to incorporate the new data. 
+Many applications of least squares (and other statistical methods) involve \emph{streaming data}, in which data is collected over a time period and the statistical model is updated as new data arrives. If the quantity of data arriving is very large, it may be inefficient or even impossible to refit the entire model on the entire dataset. Instead, we use techniques often referred to as \emph{online learning} which take the current model as a starting point and update them to incorporate the new data. 
 
 The structure of least squares problems makes them amenable to online updating (sometimes this is called "recursive" least squares). The structure of the problem is as follows, at time $t$ we receive a vector of observations $\mathbf{a}_t$ and an observation of our target variable $b_t$.
 
@@ -24,7 +23,9 @@ A_{(t)} = \begin{bmatrix} \cdots\, \mathbf{a}_1^T\, \cdots \\
 \mathbf{b}_{(t)} = \begin{bmatrix} b_1 \\ b_2 \\ \vdots \\ b_t \end{bmatrix}
 $$
 
-which says that row $j$ of the matrix $A_{(t)}$ is the $j$th observation $\mathbf{a}_j^T$, and the $j$th entry of $\mathbf{b}_{(t)}$ is $b_j$.
+which says that row $j$ of the matrix $A_{(t)}$ is the $j$th observation $\mathbf{a}_j^T$. 
+
+The $j$th entry of $\mathbf{b}_{(t)}$ is $b_j$.
 
 Here we assume that the vectors $\mathbf{a}$ each contain $n$ observations, so that $A_{(t)}$ is a $t\times n$ matrix and the vector $\mathbf{b}_{(t)}$ is a $t$-vector.
 
@@ -95,6 +96,69 @@ Use least squares optimization to fit an autoregressive time series model, repla
 ### Problem 1(a) and 1(b) Solution
 
 ```{python}
+# load packages
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+
+# read in data
+citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
+citi_data = pd.read_csv(citi_bike_raw_link)
+
+# define variables
+days = 7
+temp_length = len(citi_data)
+trips = citi_data['daily_trips'].values
+temp = citi_data['TMAX'].values
+coefficients = []
+r2_scores = []
+
+# initialize the gram matrix
+for t in range(days, temp_length):
+    a_t = np.concatenate([trips[t-days:t][::1], [temp[t]]])  
+    b_t = trips[t]
+
+    if t == days:
+        x = np.column_stack([trips[days-7:days][::-1],temp[days]])
+        y = trips[days]
+        x_ols = sm.add_constant(x)
+        model = sm.OLS(y, x_ols)
+        result = model.fit()
+        coefficients.append(result.params)
+        r2_scores.append(result.rsquared)
+    else:
+        x_t = np.column_stack(trips[t-days:days][::-1],temp[t])
+        y_t = trips[days]
+        x_ols_t = sm.add_constant(x_t)
+        model_t = sm.OLS(y_t, x_ols_t)
+        result_t = model_t.fit()
+        coefficients.append(result_t.params)
+        r2_scores.append(result_t.rsquared)
+
+coefficients = np.array(coefficients)
+r2_scores = np.array(r2_scores)
+
+# Plot the coefficients over time
+plt.figure(figsize=(10, 6))
+for i in range(coefficients.shape[1]): 
+    plt.plot(range(days, temp_length), coefficients[:, i], label=f'Coefficient {i+1}')
+plt.xlabel('Time (t)')
+plt.ylabel('Coefficient Value')
+plt.legend()
+plt.title('Coefficients Over Time')
+plt.show()
+
+# Plot R-squared values over time
+plt.figure(figsize=(10, 6))
+plt.plot(range(days, temp_length), r2_scores, label='R-squared', color='r')
+plt.xlabel('Time (t)')
+plt.ylabel('R-squared')
+plt.title('R-squared Over Time')
+plt.show()
+
+```
+```{python}
 # load dependencies
 import numpy as np
 import pandas as pd
@@ -104,13 +168,20 @@ import matplotlib.pyplot as plt
 citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
 citi_data = pd.read_csv(citi_bike_raw_link)
 
-## Part A
+# Problem 1(a)
 
 # get values and define variables
+temp_length = len(citi_data)
 trips = citi_data['daily_trips'].values
 temp = citi_data['TMAX'].values
 days = 7
 
+print(temp_length)
+print(trips)
+print(temp)
+```
+
+```{python}
 # set up gram matrix and vectors
 G = np.zeros((days + 1 , days + 1))
 h = np.zeros(days + 1)
@@ -120,19 +191,24 @@ coefficients, r_squared, predictions = [], [], []
 
 # perform the RLS
 for t in range(days, len(trips)):
-    a_t = np.concatenate([trips[t-days:t], [temp[t]]])  
+    a_t = np.concatenate([trips[t-days:t][::1], [temp[t]]])  
     b_t = trips[t]  
     
-    # append the matrix and vector
-    G += np.outer(a_t, a_t)
-    h += b_t * a_t
+    if t == days:
+        # append the matrix and vector
+        G = np.outer(a_t, a_t)
+        h = b_t * a_t
+    else:
+        G += np.outer(a_t, a_t)
+        h += b_t * a_t
+
     
     # solve for coefficients
     x_t = np.linalg.solve(G, h)
     coefficients.append(x_t)
     
     # solve for r_squared
-    predictions = np.dot(a_t, x_t)
+    predictions = np.dot(a_t, coefficients[t-days])
     residual = b_t - predictions
     ss_total = np.sum((citi_data['daily_trips'][days:] - np.mean(citi_data['daily_trips'][days:]))**2)
     ss_residual = np.sum(residual**2)
@@ -142,7 +218,7 @@ for t in range(days, len(trips)):
 coefficients = np.array(coefficients)
 r_squared = np.array(r_squared)
 
-# plot results
+# plot results (NEED TO FIX)
 plt.figure(figsize=(12, 6))
 for i in range(days):
     plt.plot(range(days, len(trips)), coefficients[:, i])
@@ -158,6 +234,10 @@ plt.xlabel('Time (days)')
 plt.ylabel('R^2')
 plt.title('R^2 over Time')
 plt.show()
+```
+
+```{python}
+# Problem 1(b)
 
 # calculate the nonlinear temperature
 nonlinear_temp = (temp - 25) ** 2
@@ -194,7 +274,7 @@ for t in range(days, len(trips)):
 coeff_nonlinear= np.array(coeff_nonlinear)
 r_squared_nonlinear = np.array(r_squared_nonlinear)
 
-# plot
+# plot (NEED TO FIX)
 plt.figure(figsize=(12, 6))
 plt.plot(coeff_nonlinear[:, :-1]) 
 plt.title('Coefficients (Nonlinear Model [First 7 days]) over Time')
@@ -203,7 +283,7 @@ plt.ylabel('Coefficient Value')
 
 # plot coefficient
 plt.plot(coeff_nonlinear[:, -1], label='(Nonlinear)')  
-plt.title('Coefficient C_T (Nonlinear) over Time')
+plt.title('Coefficient (Nonlinear) over Time')
 plt.xlabel('Time')
 plt.ylabel('Coefficient Value')
 plt.tight_layout()
@@ -310,8 +390,7 @@ print(wls_model.summary())
 
 In this problem you will use _Markowitz Portfolio Optimization_ to construct a set of portfolios that aim to achieve target expected rates of return while minimizing risk. The file [stock_returns.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/stock_returns.csv) contains information on daily asset returns from 2020-2024 for a group of assets, consisting mostly of large-cap stocks but also a handful of exchange traded funds that correspond to US Treasury Bonds and Notes with varying maturities.
 
-You will divide the data into two time periods, a training period (2020-2022) and a testing period (2022-2024). The data in the `stock_returns.csv` is stored in a long format, with the 
-following variables:
+You will divide the data into two time periods, a training period (2020-2022) and a testing period (2022-2024). The data in the `stock_returns.csv` is stored in a long format, with the following variables:
 
   1. `Company` - The ticker symbol that identifies the stock
   2. `date` - The date to which the data corresponds
@@ -320,8 +399,7 @@ following variables:
   5. `log_return`- the natural logarithm of the return
 
 
-(a)  Construct a vector (we call it $\mu$) containing the annualized rate of return over the training period (for the $i$th stock, you can use the formula: $\mu_i = \exp\left(0.5\sum_{t} \mathrm{log\_return}_i(t)\right)$), or the square root of the total return over the first two years of data,  and daily return covariance
-$\Gamma$. 
+(a)  Construct a vector (we call it $\mu$) containing the annualized rate of return over the training period (for the $i$th stock, you can use the formula: $\mu_i = \exp\left(0.5\sum_{t} \mathrm{log\_return}_i(t)\right)$), or the square root of the total return over the first two years of data,  and daily return covariance $\Gamma$. 
 
 __Hint__: Possible workflow if  working in python: convert your data to a wide format using `pandas`, extract the values into a `numpy ndarray`, and then use the function `np.cov`. 
 
@@ -334,13 +412,15 @@ $$
     \sum_{i} w_i = 1
 \end{aligned}
 $$
-Here $\mathbf{w}$ is a vector containing the investment allocations into different
-assets, and $r$ is the target rate of return.
+
+Here $\mathbf{w}$ is a vector containing the investment allocations into different assets, and $r$ is the target rate of return.
 
 Calculate optimal portfolios based on the 2020-2022 data for $r=1.05$, $r=1.10$, and $r=1.20$.
 
-(b) Plot the cumulative value of each portfolio over time, assuming that an 
-initial investment is made at the start of the period and that there is no rebalancing of the portfolio, i.e. $r_{T} = \sum_{i=1}^n w_i\Pi_{t=1}^T r_{it}$, where $r_{it}$ is the return of asset $i$ on trading day $t$, (hint: `np.cumprod` allows you to efficiently calculate this quantity).
+(b) Plot the cumulative value of each portfolio over time, assuming that an initial investment is made at the start of the period and that there is no rebalancing of the portfolio, i.e. $r_{T} = \sum_{i=1}^n w_i\Pi_{t=1}^T r_{it}$, where $r_{it}$ is the return of asset $i$ on trading day $t$.
+
+(hint: `np.cumprod` allows you to efficiently calculate this quantity).
+
 Make the plot for both the training and test sets of returns.
 
 For each of the 3 portfolios also report:
@@ -377,16 +457,61 @@ For each portfolio, also report:
 
 Comment on how the different values of $\lambda$ changed the optimal portfolios and the difference between in-sample and out-of-sample return and variance.
 
+### Problem 3 Solution
+
 ```{python}
 # load dependencies
 import numpy as np
 import pandas as pd
+import cvxpy as cp
+import matplotlib.pyplot as plt
 
-## Part A
+## Problem 3(a) Solution
 
 # read in data
 stock_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/stock_returns.csv'
 stock_return_data = pd.read_csv(stock_url)
+stock_return_data['date'] = pd.to_datetime(stock_return_data['date'])
+
+# filter data into training (2020-2022) and testing (2022-2024) periods
+train_period = stock_return_data[(stock_return_data['date'] >= '2020-01-01') & (stock_return_data['date'] <= '2022-12-31')]
+test_period = stock_return_data[(stock_return_data['date'] > '2022-12-31')]
+
+# convert the data with the log return
+train_data = train_period.pivot(index='date', columns='Company', values='log_return')
+test_data = test_period.pivot(index='date', columns='Company', values='log_return')
+
+# calculate the annual mean and covariance matrix
+mu = np.exp(0.5 * train_data.sum()) - 1
+gamma = train_data.cov().values
+
+## Problem 3(b) Solution
+# train_data = train_data.to_numpy()
+
+# define variables
+w = cp.Variable(len(mu))
+r_targets = [1.05, 1.10, 1.20]
+# optimal_weights = []
+portfolio_returns = []
+portfolio_cum_returns_train = {}
+portfolio_cum_returns_test = {}
+
+for r in r_targets:
+    # define the objective function: 0.5 * w^T * Gamma * w
+    objective = cp.Minimize(0.5 * cp.quad_form(w, gamma))
+
+    # define the constraints
+    constraints = [cp.sum(w) == 1, w.T @ mu == r]
+
+    # Solve the problem
+    problem = cp.Problem(objective, constraints)
+    optimal_weights = problem.solve()
+
+    # calculate the portfolio return
+    portfolio_returns = (train_data @ optimal_weights).cumsum()
+
+    # calculate the portfolio return 
+    # portfolio_cum_returns_train[r] = np.exp((train_data @ optimal_weights[int(r)]).cumsum())
 
 
 
