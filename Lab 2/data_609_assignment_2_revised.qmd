@@ -93,71 +93,8 @@ In python, `a @ a.T` will be an 8x8 matrix if `a.shape = (8,1)`. However, by def
 
 Use least squares optimization to fit an autoregressive time series model, replacing $T$ with the value of your new feature $f(T)$ in the time series. How does the temperature dependence coefficient differ between this model and the one you fit in (a)? Does the accuracy of the model improve or get worse using the new feature?
 
-### Problem 1(a) and 1(b) Solution
+### Problem 1 Solution
 
-```{python}
-# load packages
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
-
-# read in data
-citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
-citi_data = pd.read_csv(citi_bike_raw_link)
-
-# define variables
-days = 7
-temp_length = len(citi_data)
-trips = citi_data['daily_trips'].values
-temp = citi_data['TMAX'].values
-coefficients = []
-r2_scores = []
-
-# initialize the gram matrix
-for t in range(days, temp_length):
-    a_t = np.concatenate([trips[t-days:t][::1], [temp[t]]])  
-    b_t = trips[t]
-
-    if t == days:
-        x = np.column_stack([trips[days-7:days][::-1],temp[days]])
-        y = trips[days]
-        x_ols = sm.add_constant(x)
-        model = sm.OLS(y, x_ols)
-        result = model.fit()
-        coefficients.append(result.params)
-        r2_scores.append(result.rsquared)
-    else:
-        x_t = np.column_stack(trips[t-days:days][::-1],temp[t])
-        y_t = trips[days]
-        x_ols_t = sm.add_constant(x_t)
-        model_t = sm.OLS(y_t, x_ols_t)
-        result_t = model_t.fit()
-        coefficients.append(result_t.params)
-        r2_scores.append(result_t.rsquared)
-
-coefficients = np.array(coefficients)
-r2_scores = np.array(r2_scores)
-
-# Plot the coefficients over time
-plt.figure(figsize=(10, 6))
-for i in range(coefficients.shape[1]): 
-    plt.plot(range(days, temp_length), coefficients[:, i], label=f'Coefficient {i+1}')
-plt.xlabel('Time (t)')
-plt.ylabel('Coefficient Value')
-plt.legend()
-plt.title('Coefficients Over Time')
-plt.show()
-
-# Plot R-squared values over time
-plt.figure(figsize=(10, 6))
-plt.plot(range(days, temp_length), r2_scores, label='R-squared', color='r')
-plt.xlabel('Time (t)')
-plt.ylabel('R-squared')
-plt.title('R-squared Over Time')
-plt.show()
-
-```
 ```{python}
 # load dependencies
 import numpy as np
@@ -165,33 +102,27 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # read in data
-citi_bike_raw_link = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
-citi_data = pd.read_csv(citi_bike_raw_link)
+bike_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/daily_citibike_trips.csv'
+bike_data = pd.read_csv(bike_url)
 
-# Problem 1(a)
+### Problem 1(a)
 
-# get values and define variables
-temp_length = len(citi_data)
-trips = citi_data['daily_trips'].values
-temp = citi_data['TMAX'].values
+# extract values and define variables
+temp_length = len(bike_data)
+trips = bike_data['daily_trips'].values
+temp = bike_data['TMAX'].values
 days = 7
 
-print(temp_length)
-print(trips)
-print(temp)
-```
-
-```{python}
 # set up gram matrix and vectors
 G = np.zeros((days + 1 , days + 1))
 h = np.zeros(days + 1)
 
 # define other variables for RLS
-coefficients, r_squared, predictions = [], [], []
+coefficients, r_squared = [], []
 
 # perform the RLS
 for t in range(days, len(trips)):
-    a_t = np.concatenate([trips[t-days:t][::1], [temp[t]]])  
+    a_t = np.concatenate([trips[t-days:t][::-1], [temp[t]]])  
     b_t = trips[t]  
     
     if t == days:
@@ -208,9 +139,18 @@ for t in range(days, len(trips)):
     coefficients.append(x_t)
     
     # solve for r_squared
-    predictions = np.dot(a_t, coefficients[t-days])
-    residual = b_t - predictions
-    ss_total = np.sum((citi_data['daily_trips'][days:] - np.mean(citi_data['daily_trips'][days:]))**2)
+    predictions = []
+    
+    # collect prediction based on previous points
+    for i in range(days, t+1):
+        a_i = np.concatenate([trips[i-days:i][::-1], [temp[i]]])
+        predictions.append(np.dot(a_i, x_t))
+
+    predictions = np.array(predictions)
+    residual = trips[days:t+1] - predictions
+
+    # calculate the ss_total based on all riderships until current points 
+    ss_total = np.sum((trips[days:t+1] - np.mean(trips[days:t+1]))**2)
     ss_residual = np.sum(residual**2)
     r_squared.append(1 - (ss_residual / ss_total))
 
@@ -218,10 +158,8 @@ for t in range(days, len(trips)):
 coefficients = np.array(coefficients)
 r_squared = np.array(r_squared)
 
-# plot results (NEED TO FIX)
+# plot results
 plt.figure(figsize=(12, 6))
-for i in range(days):
-    plt.plot(range(days, len(trips)), coefficients[:, i])
 plt.plot(range(days, len(trips)), coefficients[:, days])
 plt.xlabel('Time (days)')
 plt.ylabel('Coefficient Value')
@@ -229,15 +167,13 @@ plt.title('Coefficients over Time')
 plt.show()
 
 plt.figure(figsize=(12, 6))
-plt.plot(range(days, len(trips)), r_squared, label='R^2')
+plt.plot(r_squared, label='R^2')
 plt.xlabel('Time (days)')
 plt.ylabel('R^2')
 plt.title('R^2 over Time')
 plt.show()
-```
 
-```{python}
-# Problem 1(b)
+### Problem 1(b)
 
 # calculate the nonlinear temperature
 nonlinear_temp = (temp - 25) ** 2
@@ -247,57 +183,61 @@ G_nonlinear = np.zeros((days + 1 , days + 1))
 h_nonlinear = np.zeros(days + 1)
 
 # define other variables for RLS
-coeff_nonlinear, r_squared_nonlinear, predictions_nonlinear = [], [], []
+coefficients_nonlinear, r_squared_nonlinear = [], []
 
-# perform RLS for nonlinear
+# perform the RLS for nonlinear temperature
 for t in range(days, len(trips)):
-    a_t_nl = np.concatenate([trips[t-days:t][::-1], [nonlinear_temp[t]]]) 
+    a_t_nl = np.concatenate([trips[t-days:t][::-1], [nonlinear_temp[t]]])  
+    b_t_nl = trips[t]  
     
-    # update gram matrix
-    G_nonlinear += np.outer(a_t_nl, a_t_nl)
-    h_nonlinear += a_t_nl * trips[t]
+    if t == days:
+        # append the nonlinear matrix and vector
+        G_nonlinear = np.outer(a_t_nl, a_t_nl)
+        h_nonlinear = b_t_nl * a_t_nl
+    else:
+        G_nonlinear += np.outer(a_t_nl, a_t_nl)
+        h_nonlinear += b_t_nl * a_t_nl
+
     
-    # solve for coefficients using least squares (Gx = h)
+    # solve for coefficients
     x_t_nl = np.linalg.solve(G_nonlinear, h_nonlinear)
-    coeff_nonlinear.append(x_t_nl)
+    coefficients_nonlinear.append(x_t_nl)
     
-    # calculate predictions
-    y_hat_nl = np.dot(a_t_nl, x_t_nl)
-    predictions_nonlinear.append(y_hat_nl)
+    # solve for r_squared
+    predictions_nonlinear = []
     
-    # calculate new r squared
-    ss_total_nl = np.sum((citi_data['daily_trips'][days:t + 1] - np.mean(citi_data['daily_trips'][days:]))**2)
-    ss_residual_nl = np.sum((citi_data['daily_trips'][days:t + 1] - y_hat_nl)**2)
+    # collect prediction based on previous points
+    for i in range(days, t+1):
+        a_i_nl = np.concatenate([trips[i-days:i][::-1], [nonlinear_temp[i]]])
+        predictions_nonlinear.append(np.dot(a_i_nl, x_t_nl))
+
+    predictions_nonlinear = np.array(predictions_nonlinear)
+    residual_nl = trips[days:t+1] - predictions_nonlinear
+
+    # calculate the ss_total based on all riderships until current points 
+    ss_total_nl = np.sum((trips[days:t+1] - np.mean(trips[days:t+1]))**2)
+    ss_residual_nl = np.sum(residual_nl**2)
     r_squared_nonlinear.append(1 - (ss_residual_nl / ss_total_nl))
 
-# convert coefficent and new r_squared into arrays
-coeff_nonlinear= np.array(coeff_nonlinear)
+# save both nonlinear coefficients and r squared in an array
+coefficients_nonlinear = np.array(coefficients_nonlinear)
 r_squared_nonlinear = np.array(r_squared_nonlinear)
 
-# plot (NEED TO FIX)
+# plot results
 plt.figure(figsize=(12, 6))
-plt.plot(coeff_nonlinear[:, :-1]) 
-plt.title('Coefficients (Nonlinear Model [First 7 days]) over Time')
-plt.xlabel('Time')
-plt.ylabel('Coefficient Value')
-
-# plot coefficient
-plt.plot(coeff_nonlinear[:, -1], label='(Nonlinear)')  
-plt.title('Coefficient (Nonlinear) over Time')
-plt.xlabel('Time')
-plt.ylabel('Coefficient Value')
-plt.tight_layout()
+plt.plot(range(days, len(trips)), coefficients_nonlinear[:, days])
+plt.xlabel('Time (days)')
+plt.ylabel('Coefficient Value (Non-linear)')
+plt.title('Coefficients (Non-linear) over Time')
 plt.show()
 
-# plot R-squared for nonlinear model
 plt.figure(figsize=(12, 6))
-plt.plot(r_squared_nonlinear)
-plt.title('R-squared (Nonlinear Model) over Time')
-plt.xlabel('Time')
-plt.ylabel('R-squared')
+plt.plot(r_squared, label='R^2')
+plt.xlabel('Time (days)')
+plt.ylabel('R^2 (Non-linear)')
+plt.title('R^2 (Non-lienear) over Time')
 plt.show()
 ```
-
 
 ## Problem 2: Weighted Least Squares
 
@@ -323,7 +263,7 @@ import matplotlib.pyplot as plt
 social_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/social_mobility.csv'
 social_mobility_data = pd.read_csv(social_url)
 
-## Part A
+## Problem 2(a)
 
 # log tranform the population and define the variable for mobility
 log_pop = np.log(social_mobility_data['Population'])
@@ -357,8 +297,6 @@ social_mobility_data = pd.read_csv(social_url)
 
 social_mobility_data = social_mobility_data[["Commute","Student_teacher_ratio","Mobility","Population"]]
 social_mobility_data = social_mobility_data.dropna()
-
-## Part C
 
 # define variable
 commute = social_mobility_data['Commute']
