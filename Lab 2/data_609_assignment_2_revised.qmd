@@ -1,7 +1,7 @@
 ---
 title: "DATA 609 - Homework 2: Applications of Least Squares"
 author: Eddie Xu
-format: html
+format: pdf
 editor: source
 ---
 
@@ -424,35 +424,124 @@ mu = np.exp(0.5 * train_data.sum()) - 1
 gamma = train_data.cov().values
 
 ## Problem 3(b) Solution
-# train_data = train_data.to_numpy()
 
 # define variables
-w = cp.Variable(len(mu))
 r_targets = [1.05, 1.10, 1.20]
-# optimal_weights = []
-portfolio_returns = []
+optimal_weights = {}
 portfolio_cum_returns_train = {}
 portfolio_cum_returns_test = {}
 
 for r in r_targets:
+    # define the variable 
+    w = cp.Variable(len(mu))
+
     # define the objective function: 0.5 * w^T * Gamma * w
     objective = cp.Minimize(0.5 * cp.quad_form(w, gamma))
 
     # define the constraints
-    constraints = [cp.sum(w) == 1, w.T @ mu == r]
+    constraints = [cp.sum(w) == 1, w.T @ mu == r, w >= 0]
 
     # Solve the problem
     problem = cp.Problem(objective, constraints)
-    optimal_weights = problem.solve()
+    problem.solve()
 
-    # calculate the portfolio return
-    portfolio_returns = (train_data @ optimal_weights).cumsum()
+    # store the optimal weight
+    optimal_weights[r] = w.value
 
-    # calculate the portfolio return 
-    # portfolio_cum_returns_train[r] = np.exp((train_data @ optimal_weights[int(r)]).cumsum())
+    # Calculate portfolio returns for training period
+    portfolio_returns_train = train_data.dot(w.value)
+    portfolio_cum_returns_train[r] = np.cumprod(1 + portfolio_returns_train)
+
+    # Calculate portfolio returns for testing period
+    portfolio_returns_test = test_data.dot(w.value)
+    portfolio_cum_returns_test[r] = np.cumprod(1 + portfolio_returns_test)
+
+# Plot cumulative returns for training and testing periods
+plt.figure(figsize=(12, 6))
+
+for r in r_targets:
+    plt.plot(portfolio_cum_returns_train[r], label=f'Training: r={r}')
+
+plt.title('Cumulative Portfolio Value for Different Target Returns (Training)')
+plt.legend()
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
+
+plt.figure(figsize=(12, 6))
+
+for r in r_targets:
+    plt.plot(portfolio_cum_returns_test[r], label=f'Testing: r={r}')
+
+plt.title('Cumulative Portfolio Value for Different Target Returns (Testing)')
+plt.legend()
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
+
+## Problem 3(c) Solution
+
+# set the target return
+r = 0.20  
+
+# define the lambda range
+lambda_values = np.logspace(-1, 1, 10) 
+
+# define dicts for storing results
+optimal_weights_ridge = {}
+portfolio_cum_returns_train_ridge = {}
+portfolio_cum_returns_test_ridge = {}
 
 
+for lam in lambda_values:
+    # define the variable
+    w = cp.Variable(len(mu))
 
+    # define the objective function: 0.5 * w^T * (Gamma + lambda * I) * w
+    objective = cp.Minimize(0.5 * cp.quad_form(w, cp.psd_wrap(gamma + lam * np.eye(len(mu)))))
+
+    # define the constraints
+    constraints = [cp.sum(w) == 1, w.T @ mu == r, w >= 0]
+
+    # define the optimization problem
+    problem = cp.Problem(objective, constraints)
+
+    # Solve the problem
+    problem.solve()
+
+    # store the optimal weights
+    optimal_weights_ridge[lam] = w.value
+
+    # calculate portfolio returns for training data
+    portfolio_returns_train = train_data.dot(w.value)
+    portfolio_cum_returns_train_ridge[lam] = np.cumprod(1 + portfolio_returns_train)
+
+    # calculate portfolio returns for testing data
+    portfolio_returns_test = test_data.dot(w.value)
+    portfolio_cum_returns_test_ridge[lam] = np.cumprod(1 + portfolio_returns_test)
+
+# plot the lamda training period
+plt.figure(figsize=(12, 6))
+
+for lam in lambda_values:
+    plt.plot(portfolio_cum_returns_train_ridge[lam], label=f'Training: λ={lam:.2f}')
+
+plt.legend()
+plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Training)')
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
+
+# plot the lamda testing period
+plt.figure(figsize=(12, 6))
+for lam in lambda_values:
+    plt.plot(portfolio_cum_returns_test_ridge[lam], label=f'Testing: λ={lam:.2f}'
+
+plt.legend()
+plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Testing)')
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
 ```
 
 ## Potential Projects Based on this Homework:
