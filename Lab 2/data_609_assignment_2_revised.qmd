@@ -521,24 +521,21 @@ for lam in lambda_values:
     portfolio_cum_returns_test_ridge[lam] = np.cumprod(1 + portfolio_returns_test)
 
 # plot the lamda training period
-plt.figure(figsize=(12, 6))
-
 for lam in lambda_values:
     plt.plot(portfolio_cum_returns_train_ridge[lam], label=f'Training: λ={lam:.2f}')
 
+#plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Training)')
 plt.legend()
-plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Training)')
 plt.xlabel('Days')
 plt.ylabel('Cumulative Portfolio Value')
 plt.show()
 
 # plot the lamda testing period
-plt.figure(figsize=(12, 6))
 for lam in lambda_values:
-    plt.plot(portfolio_cum_returns_test_ridge[lam], label=f'Testing: λ={lam:.2f}'
+    plt.plot(portfolio_cum_returns_test_ridge[lam], label=f'Testing: λ={lam:.2f}')
 
-plt.legend()
 plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Testing)')
+plt.legend()
 plt.xlabel('Days')
 plt.ylabel('Cumulative Portfolio Value')
 plt.show()
