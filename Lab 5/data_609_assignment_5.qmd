@@ -61,6 +61,33 @@ Some hints for selected parts:
 (d) Use `huber()`
 (e) The extended exercises claimed that the `log-barrier` objective needed to be reformulated to use the geometric mean, but I found that this problem worked perfectly well with a straightforward implementation. I suspect that the `CVX` software was upgraded to better handle `log` and `exp` objecties since this exercise was developed. 
 
+### Problem 1 Solution
+
+```{python}
+# load dependencies
+import numpy as np
+import pandas as pd
+import cvxpy as cp
+import matplotlib.plt as plt
+
+# define variable and create data
+m = 200
+n = 100
+
+# create matrix A and normalize b
+A = np.random.normal(0,1,(m,n))
+b = np.random.normal(0,1,m)
+b = b / (1.01 * np.max(np.abs(b)))
+
+# define the optimization variable
+x = cp.Variable(n)
+y = A @ x - b
+
+# define the penalty function
+
+
+```
+
 ## Problem 2: Fitting Censored Data (Extended Exercises 6.13 in CVX Book)
 
 In some experiments there are two kinds of measurements or data available: The usual ones, in which you get a number (say), and censored data, in which you don’t get the specific number, but are told something about it, such as a lower bound. 
@@ -137,8 +164,7 @@ robust logistic regression problem.
 
 Hint: $log(1 + exp(u)))$ is monotonic in u.
 
-(b) Fit a standard logistic regression model (i.e., minimize $l(\theta)$), and also a robust logistic regression model
-(i.e., minimize $l_{wc}(\theta)$), using the data given in [rob_regression.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/rob_regression.csv) and [rob_regression_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/rob_regression_test.csv). 
+(b) Fit a standard logistic regression model (i.e., minimize $l(\theta)$), and also a robust logistic regression model (i.e., minimize $l_{wc}(\theta)$), using the data given in [rob_regression.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/rob_regression.csv) and [rob_regression_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/rob_regression_test.csv). 
 
 The $\mathbf{x}_i$s are provided as the rows of an $n \times d$ matrix named $X$ (these are the variables of the data frame named "X_1, X_2, ..."). The $y_i$s are provided as the entries of a $n$-vector named $y$ (the first column in the data frame). 
 

@@ -1,0 +1,19 @@
+---
+title: "DATA 609: Project Proposal"
+format: html
+editor: source
+author: Eddie Xu
+---
+
+When writing proposals, I’ve found the following set of considerations, called “Heilmeier's Questions”, to be helpful to consider. Although this is just a very short project, you might find them helpful as well, and useful for formulating future projects and proposals that you might have to complete. These questions were developed by Dr. George Heilmeier, who was the director of DARPA from 1975-1977. Heilmeier said that every proposal to DARPA needed to answer these questions clearly and completely in order to receive funding:
+
+What are you trying to do? Articulate your objectives using absolutely no jargon. What is the problem? Why is it hard?
+How is it done today, and what are the limits of current practice?
+What is new in your approach, and why do you think it will be successful?
+Who cares?
+If you’re successful, what difference will it make? What applications are enabled as a result?
+What are the risks?
+How long will it take?
+What are the midterm and final “exams” to check for success? How will progress be measured?
+
+The purpose of the project is to use the 
