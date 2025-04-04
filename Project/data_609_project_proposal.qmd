@@ -16,4 +16,12 @@ What are the risks?
 How long will it take?
 What are the midterm and final “exams” to check for success? How will progress be measured?
 
-The purpose of the project is to use the 
+### Problem
+
+Financial companies often need their investment portfolio to meet certain thresholds and regulatory requirement. With many vanilla and complex financial instruments in the market, it is very challenging for companies and auditors to maintain that objective. To ensure the portfolio is to be comply with these constraints, it requires many resources and times for auditing professionals to do. That is a problem since many mistakes can be made during short periods of time and companies can be penalized and fined in millions of dollars. That is the challenge in the current financial industry.
+
+### Approach
+
+The purpose of this project is to use the convex optimization to help detect financial detection and help reduce the workload for professionals. At the moment, not many machine learning techniques or methods are being used in financial auditing and regulatory reporting. 
+
+This approach could be successful since If successful, this approach can help companies detect those deviations or anomalies earlier while maintaining the minimal portfolio return. 
