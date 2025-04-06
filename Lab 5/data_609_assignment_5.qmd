@@ -192,10 +192,9 @@ $$
 
 ### Problem 2 Solution
 
-```{python}
-#| echo: true
-#| eval: false
+Censored data points should not be treated as variables because their exact values are unknown. They should be treated as parameters within the optimization model that satisfy constraints. For censor data points, they will be minimized with the direct error and for censored data points, the constraint will be set as 
 
+```{python}
 # load dependencies
 import numpy as np
 import cvxpy as cp
@@ -207,76 +206,50 @@ url = 'https://raw.githubusercontent.com/georgehagstrom/DATA609Spring2025/refs/h
 resp = requests.get(url)
 data = json.loads(resp.text)
 
-# Extract the data components
-X = np.array(data['n'])  # The features (design matrix)
-y = np.array(data['M'])  # The observed y values (including censored ones)
-D = data['D']  # The lower bound for censored data
-m = len([yi for yi in y if yi is not None])  # The number of uncensored points
+# define variable from data
+X = np.array(data["X"]).reshape(data["K"], data["n"]) 
+y = np.array(data["y"]).flatten() 
+D = data["D"][0]
+c_true = np.array(data["c_true"]).flatten() 
+n = data["n"]
+m = data["M"] 
+k = data["K"]
 
-# Extract the true value of c
-c_true = np.array(data['c_true'])
+# split the data into uncensored and censored data points
+X_uncensored = X[:m, :]
+y_uncensored = y[:m]
+X_censored = X[m:, :]
 
-# Variables for the optimization problem
-n = X.shape[1]  # Number of features (dimension of c)
-k = len(y)  # Total number of data points
-c = cp.Variable(n)  # The model parameter vector c
+# set the variable for censored data point and parameter
+y_censored = cp.Variable(k - m)
+c = cp.Variable(n)
 
-# Separate the censored and uncensored data
-uncensored_indices = [i for i in range(k) if y[i] is not None]  # Indices of uncensored data
-censored_indices = [i for i in range(k) if y[i] is None]  # Indices of censored data
+# define the objective for the least-squares error for uncensored data and the error for censored data (which is constrained)
+objective = cp.Minimize(cp.sum_squares(y_uncensored - X_uncensored @ c) + cp.sum_squares(y_censored - X_censored @ c))
 
-# Ensure that X is a 2D array (k, n)
-X = np.squeeze(X)  # Remove any unnecessary dimensions, ensuring X is of shape (k, n)
+# define the constraint 
+constraints = [y_censored >= D]
 
-# Check if there are any censored data points
-if len(censored_indices) > 0:
-    # Optimization variable for censored y values (corresponding to censored data points)
-    y_censored = cp.Variable(len(censored_indices))  # Variable for censored data values
-    
-    # Define the full y vector (combining censored and uncensored data)
-    y_full = np.copy(y)
-    for i, idx in enumerate(censored_indices):
-        y_full[idx] = y_censored[i]  # Replace censored data with the optimization variables
-    
-    # Objective: Minimize the least-squares error
-    objective = cp.Minimize(cp.sum_squares(y_full - X @ c))  # X @ c must have shape (k, )
-    
-    # Constraints: Censored values should be >= D
-    constraints = [y_censored >= D]
-    
-    # Define and solve the problem
-    problem = cp.Problem(objective, constraints)
-    problem.solve()
+# create and solve the optimization problem
+problem = cp.Problem(objective, constraints)
+problem.solve()
 
-    # Get the optimized values
-    c_opt = c.value  # Optimized model parameter vector c
-    y_opt = y_censored.value  # Optimized censored y values
-else:
-    # If there are no censored data points, we can skip the censored optimization
-    y_full = y  # Use the full observed data directly
-    objective = cp.Minimize(cp.sum_squares(y_full - X @ c))  # Minimize the least-squares error
-    problem = cp.Problem(objective)
-    problem.solve()
-    
-    # Get the optimized values
-    c_opt = c.value  # Optimized model parameter vector c
-    y_opt = None  # No censored values to return
+# save the result
+c_hat = c.value  
+y_hat_censored = y_censored.value
 
-# Compute the least-squares estimate ignoring censored data
-X_uncensored = X[uncensored_indices]  # Extract uncensored data points
-y_uncensored = y[uncensored_indices]  # Extract corresponding y values
-
+# calculate the least-squares estimate ignoring censored data
 c_ls = np.linalg.lstsq(X_uncensored, y_uncensored, rcond=None)[0]
 
-# Compute relative errors
-error_c = np.linalg.norm(c_true - c_opt)**2 / np.linalg.norm(c_true)**2
+# calculate the relative errors
+error_c = np.linalg.norm(c_true - c_hat)**2 / np.linalg.norm(c_true)**2
 error_c_ls = np.linalg.norm(c_true - c_ls)**2 / np.linalg.norm(c_true)**2
 
-# Output the results
-print("Optimized c:", c_opt)
-print("Least-squares c (ignoring censored data):", c_ls)
-print("Relative error for c (with censored data):", error_c)
-print("Relative error for c_ls (without censored data):", error_c_ls)
+# print
+print(f"Optimized c (with censored data): {c_hat}")
+print(f"Least-squares c (ignoring censored data): {c_ls}")
+print(f"Relative error (with censored data): {error_c}")
+print(f"Relative error (least-squares): {error_c_ls}")
 ```
 
 ## Problem 3: Robust Logistic Regression (Exercise 6.29 in the CVX Book extended exercises) 
@@ -315,3 +288,7 @@ Hint: $log(1 + exp(u)))$ is monotonic in u.
 The $\mathbf{x}_i$s are provided as the rows of an $n \times d$ matrix named $X$ (these are the variables of the data frame named "X_1, X_2, ..."). The $y_i$s are provided as the entries of a $n$-vector named $y$ (the first column in the data frame). 
 
 The file also contains a test data set, $X_{\mathrm{test}}$, $y_{\mathrm{test}}$. Give the test error rate (i.e., fraction of test set data points for which $\hat{y}= y$) for the logistic regression and robust logistic regression models.
+
+```{python}
+
+```
