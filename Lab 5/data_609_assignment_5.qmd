@@ -266,7 +266,9 @@ $$
 
 which is a convex function of $\theta$. Here $\|\delta_i\|_{\infty} = \max_j |\delta_{ij}|$. Remember that each $\delta_i$ is a vector with length the same as $\mathbf{x}_i$.
 
-In robust regression, we take into account the idea that the feature vectors $\mathbf{x}_i$ are not known precisely. Specifically we imagine that each entry of each feature vector can vary by $\pm\epsilon$, where $\epsilon > 0$ is a given uncertainty level. 
+In robust regression, we take into account the idea that the feature vectors $\mathbf{x}_i$ are not known precisely. 
+
+Specifically we imagine that each entry of each feature vector can vary by $\pm\epsilon$, where $\epsilon > 0$ is a given uncertainty level. 
 
 We define the worst-case logistic loss as:
 
@@ -290,5 +292,79 @@ The $\mathbf{x}_i$s are provided as the rows of an $n \times d$ matrix named $X$
 The file also contains a test data set, $X_{\mathrm{test}}$, $y_{\mathrm{test}}$. Give the test error rate (i.e., fraction of test set data points for which $\hat{y}= y$) for the logistic regression and robust logistic regression models.
 
 ```{python}
+# load dependencies
+import pandas as pd
+import numpy as np
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
+import cvxpy as cp
 
+# load train data
+train_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/rob_regression.csv'
+train_data = pd.read_csv(train_url, index_col='Unnamed: 0')
+
+# load test data
+test_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/rob_regression_test.csv'
+test_data = pd.read_csv(test_url, index_col = 'Unnamed: 0')
+
+# slice both train and test data
+X_train = train_data.drop('y', axis=1).values
+y_train = train_data['y'].values
+X_test = test_data.drop('y_test', axis = 1).values
+y_test = test_data['y_test'].values
+
+# define the standard Logistic Regression
+logreg = LogisticRegression(solver='liblinear')
+logreg.fit(X_train, y_train)
+
+# calculate the prediction and the error rate for Logistic Regression
+y_pred_logreg = logreg.predict(X_test)
+error_rate_logreg = np.mean(y_pred_logreg != y_test)
+
+accuracy = accuracy_score(y_test, y_pred_logreg)
+print(f"Standard Logistic Regression Test Accuracy: {accuracy}")
+
+
+# (b) For robust logistic regression
+
+# Define epsilon (the perturbation magnitude)
+epsilon = 0.1  # You can adjust this value based on your data
+
+# Get the number of features
+d = X_train.shape[1]
+
+# Define the theta variable (model parameter)
+theta = cp.Variable(d)
+
+# Initialize the robust logistic loss
+loss = 0
+
+# Loop over each training sample to add the robust logistic loss term
+for i in range(X_train.shape[0]):
+    xi = X_train[i]  # The feature vector (now using numpy array indexing)
+    yi = y_train[i]  # The label (now using numpy array indexing)
+    
+    # The logistic loss term with the worst-case perturbation
+    log_term = cp.log(1 + cp.exp(-yi * (xi @ theta)))  # Standard logistic loss term
+    perturbation = epsilon * cp.norm1(theta)  # The perturbation term
+    
+    # Add the perturbation to the logistic loss term
+    loss += log_term + perturbation  # Sum up the loss for each example
+
+# Objective is to minimize the robust logistic loss
+objective = cp.Minimize(loss)
+
+# Solve the problem using cvxpy
+problem = cp.Problem(objective)
+problem.solve(solver=cp.SCS)
+
+# Get the optimized theta from the cvxpy solver
+theta_robust = theta.value
+
+# Predict on the test set using the robust model
+y_pred_robust = np.sign(X_test.dot(theta_robust))
+
+# Calculate accuracy (test error rate) for the robust model
+accuracy_robust = accuracy_score(y_test, y_pred_robust)
+print(f"Robust Logistic Regression Test Accuracy: {accuracy_robust}")
 ```
