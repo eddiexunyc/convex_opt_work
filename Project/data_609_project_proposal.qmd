@@ -1,27 +1,19 @@
 ---
-title: "DATA 609: Project Proposal"
-format: html
+title: "DATA 609: Project Proposal - A Simple Convex Optimization on Regulatory Financial Reporting"
+format: pdf
 editor: source
 author: Eddie Xu
 ---
 
-When writing proposals, I’ve found the following set of considerations, called “Heilmeier's Questions”, to be helpful to consider. Although this is just a very short project, you might find them helpful as well, and useful for formulating future projects and proposals that you might have to complete. These questions were developed by Dr. George Heilmeier, who was the director of DARPA from 1975-1977. Heilmeier said that every proposal to DARPA needed to answer these questions clearly and completely in order to receive funding:
+All financial institutions are required to report their financial data in accordance with multiple regulatory frameworks such as Basel III and Dodd Frank Act. Due to the complexities with some of the framework, it can be challenging for some financial companies, particularly smaller regional or community banks, to maximize their returns while ensure that they are to be in regulatory compliance on limited resources and times. Because of that, it can cause potential reporting errors and may lead to financial institutions being penalized with fines of millions dollars and may have a significant impact on the financial market.
 
-What are you trying to do? Articulate your objectives using absolutely no jargon. What is the problem? Why is it hard?
-How is it done today, and what are the limits of current practice?
-What is new in your approach, and why do you think it will be successful?
-Who cares?
-If you’re successful, what difference will it make? What applications are enabled as a result?
-What are the risks?
-How long will it take?
-What are the midterm and final “exams” to check for success? How will progress be measured?
+For this project, the purpose will be using convex optimization applications for a simple regulatory finanical reporting problem. Specifically, the optimal allocation of a bank's capital across different assets (cash, bonds, stocks, etc) will be determined in order to maximize returns while ensuring compliance with regulatory capital requirements. 
 
-### Problem
+While convex optimization is used for finance, it is only used for portfolio optimization and it has not been fully explored in terms of regulatory reporting perspectives. If this project is successful, it can serve as a starting point to explore and devlop deep learning or non-convex optimization applications.
 
-Financial companies often need their investment portfolio to meet certain thresholds and regulatory requirement. With many vanilla and complex financial instruments in the market, it is very challenging for companies and auditors to maintain that objective. To ensure the portfolio is to be comply with these constraints, it requires many resources and times for auditing professionals to do. That is a problem since many mistakes can be made during short periods of time and companies can be penalized and fined in millions of dollars. That is the challenge in the current financial industry.
+This project is derived from the problem 3 of Lab 2 assignment and the approach from that assignment will be applied in this project. The approach will be using historical public financial data from various databases to ensure that there are no missing or inaccurate data since some financial data are not available to public. That could be a risk factor since inaccurate or missing data can impact the optimization. The constraint used for this project are regulatory requirements set by the frameworks.
 
-### Approach
 
-The purpose of this project is to use the convex optimization to help detect financial detection and help reduce the workload for professionals. At the moment, not many machine learning techniques or methods are being used in financial auditing and regulatory reporting. 
 
-This approach could be successful since If successful, this approach can help companies detect those deviations or anomalies earlier while maintaining the minimal portfolio return. 
+
+
