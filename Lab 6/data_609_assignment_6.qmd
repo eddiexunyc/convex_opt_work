@@ -5,66 +5,53 @@ editor: source
 author: Eddie Xu
 ---
 
-
 ## Instructions
 
 Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file,
 I recommend python, julia, or R. 
 
-
 ## Problem 1: Multi-Label Support Vector Machine (CVX Additional Exercises 6.18)
 
-The basic SVM described in chapter 8 of the book is used for classification of data with two labels. In this problem we explore an extension of SVM that can be used to carry
-out classification of data with more than two labels. Our data consists of pairs: 
-$(\mathbf{x}_i , y_i ) \in \mathbf{R}^n \times
-\{1, \dots , K\},\, i = 1, \dots , m$, where $\mathbf{x}_i$ is the feature vector and $y_i$ is the label of the $i$th data point. (So
-the labels can take the values $1, \dots , K$.) Our classifier will use $K$ affine functions, $f_k(\mathbf{x}) = \mathbf{a}^T_k \mathbf{x} + \mathbf{b}_k$ ,
-$k = 1, . . . , K$, which we also collect into affine function from $\mathbb{R}^n$ into $\mathbb{R}^K$ as $f(\mathbf{x}) = A\mathbf{x} + \mathbf{b}$. (The
-rows of $A$ are $\mathbf{a}^T_k$ .) Given the feature vector $\mathbf{x}$, our model predicts the label $\hat{y} = \mathrm{argmax}_k f_k (\mathbf{x})$, i.e. the predicted label is given by the index of the largest value of the $f_k$ functions evaluated at the data point. We assume that
-exact ties never occur, or if they do, an arbitrary choice can be made. Note that if a multiple of 1
+The basic SVM described in chapter 8 of the book is used for classification of data with two labels. In this problem we explore an extension of SVM that can be used to carry out classification of data with more than two labels. Our data consists of pairs: 
+$(\mathbf{x}_i , y_i ) \in \mathbf{R}^n \times \{1, \dots , K\},\, i = 1, \dots , m$ 
+
+where $\mathbf{x}_i$ is the feature vector and $y_i$ is the label of the $i$th data point. (So the labels can take the values $1, \dots , K$.) 
+
+Our classifier will use $K$ affine functions, $f_k(\mathbf{x}) = \mathbf{a}^T_k \mathbf{x} + \mathbf{b}_k$, $k = 1, . . . , K$, which we also collect into affine function from $\mathbb{R}^n$ into $\mathbb{R}^K$ as $f(\mathbf{x}) = A\mathbf{x} + \mathbf{b}$. (Therows of $A$ are $\mathbf{a}^T_k$ .) Given the feature vector $\mathbf{x}$, our model predicts the label $\hat{y} = \mathrm{argmax}_k f_k (\mathbf{x})$, i.e. the predicted label is given by the index of the largest value of the $f_k$ functions evaluated at the data point. 
+
+We assume that exact ties never occur, or if they do, an arbitrary choice can be made. Note that if a multiple of 1
 is added to $\mathbf{b}$, the classifier does not change. Thus, without loss of generality, we can assume that
+
 $\mathbf{1}^T \mathbf{b} = 0$.
 
-To correctly classify all the data examples perfectly, we would need $f_{y_i} (\mathbf{x}_i ) > \mathrm{max}_{k\neq y_i} f_k (\mathbf{x}_i )$ for all $i$. This set of
-inequalities in $a_k$ and $b_k$, are feasible if and only if the set of
-inequalities $f_{y_i} (\mathbf{x}_i ) \geq 1 + \mathrm{max}_{k\neq y_i} f_k (\mathbf{x}_i )$ are feasible. This motivates the loss function:
+To correctly classify all the data examples perfectly, we would need $f_{y_i} (\mathbf{x}_i ) > \mathrm{max}_{k\neq y_i} f_k (\mathbf{x}_i )$ for all $i$. This set of inequalities in $a_k$ and $b_k$, are feasible if and only if the set of inequalities $f_{y_i} (\mathbf{x}_i ) \geq 1 + \mathrm{max}_{k\neq y_i} f_k (\mathbf{x}_i )$ are feasible. This motivates the loss function:
 
 $$
 L(A, \mathbf{b}) = \sum_{i=1}^m\left(1 + \mathrm{max}_{k \neq y_i}f_k(\mathbf{x}_i) - f_{y_i}(\mathbf{x}_i)  \right)_+
 $$
-where $(u)_+ = \mathrm{max}\{u, 0\}$. The multi-label SVM chooses $A$ and $\mathbf{b}$ to minimize
-$L(A, b) + \mu\|A\|_F^2,$
-subject to $\mathbf{1}^T \mathbf{b} = 0$, where $\mu > 0$ is a regularization parameter. (Several variations on this are
-possible, such as regularizing b as well, or replacing the Frobenius norm squared with the sum of
-norms of the columns of A.). The Frobenius norm is a generalization of the $2$-norm from vectors to matrices, it is defined as $\|A\|_F = \left(\sum_{ij} A_{ij}^2\right)^{1/2}$ and implemented in `CVX` using `norm(A,'fro')`. 
+
+where $(u)_+ = \mathrm{max}\{u, 0\}$. The multi-label SVM chooses $A$ and $\mathbf{b}$ to minimize $L(A, b) + \mu\|A\|_F^2,$ subject to $\mathbf{1}^T \mathbf{b} = 0$, where $\mu > 0$ is a regularization parameter. (Several variations on this are possible, such as regularizing b as well, or replacing the Frobenius norm squared with the sum of norms of the columns of A.). The Frobenius norm is a generalization of the $2$-norm from vectors to matrices, it is defined as $\|A\|_F = \left(\sum_{ij} A_{ij}^2\right)^{1/2}$ and implemented in `CVX` using `norm(A,'fro')`. 
 
 (a) Show how to find $A$ and $\mathbf{b}$ using convex optimization. Be sure to justify any changes of
 variables or reformulation (if needed), and convexity of the objective and constraints in your
 formulation.
 
+(b) Carry out multi-label SVM on the data given in [multi_label_svm_data.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/multi_label_svm_data.csv). 
 
-(b) Carry out multi-label SVM on the data given in [multi_label_svm_data.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/multi_label_svm_data.csv). Use the data
-given in $\mathbf{X}$ and $y$ to fit the SVM model, for a range of values of $\mu$. Use the data given in [multi_label_svm_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/multi_label_svm_test.csv) to test the SVM models. Plot the
-test set classification error rate (i.e., the fraction of data examples in the test set for which
-$\hat{y} \neq y$) versus $\mu$.
+Use the data given in $\mathbf{X}$ and $y$ to fit the SVM model, for a range of values of $\mu$. Use the data given in [multi_label_svm_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/multi_label_svm_test.csv) to test the SVM models. Plot the
+test set classification error rate (i.e., the fraction of data examples in the test set for which $\hat{y} \neq y$) versus $\mu$.
 
-You don’t need to try more than 10 or 20 values of $\mu$, and we suggest choosing them uniformly
-on a `log` scale, from (say) $10^{−2}$ to $10^2$ .
-
+You don’t need to try more than 10 or 20 values of $\mu$, and we suggest choosing them uniformly on a `log` scale, from (say) $10^{−2}$ to $10^2$ .
 
 ## Problem 2: Maximum Likelihood Prediction of Team Abilities (Adapted from Exercise 7.4 in Convex Optimization Extended Exercises)
 
-A set of $n$ teams compete in a tournament. We
-model each team’s ability by a number $a_j,\, j = 1, \cdots , n$. When teams $j$ and $k$ play each
-other, the probability that team $j$ wins is equal to:
+A set of $n$ teams compete in a tournament. We model each team’s ability by a number $a_j,\, j = 1, \cdots , n$. When teams $j$ and $k$ play each other, the probability that team $j$ wins is equal to:
 
 $$
 \mathrm{prob}(a_j − a_k + v > 0)
 $$ 
 
-where $v \sim \mathrm{Normal}(0, \sigma^2 )$. This means 
-we can also write the probability as $p(\mathrm{i\,\, beats \,\, j}) =  = \Phi\left(\frac{a_j-a_k}{\sigma}\right)$, where $\Phi$ is the cumulative distribution function of 
-the standard normal distribution.
+where $v \sim \mathrm{Normal}(0, \sigma^2 )$. This means we can also write the probability as $p(\mathrm{i\,\, beats \,\, j}) =  = \Phi\left(\frac{a_j-a_k}{\sigma}\right)$, where $\Phi$ is the cumulative distribution function of the standard normal distribution.
 
 You are given the outcome of $m$ past games. These are organized as in a game incidence matrix $A$, where the $l$th row of $A$ corresponds to game $l$ and where:
 
@@ -74,22 +61,18 @@ A_{il} = \begin{cases} 1 \quad &\mathrm{if\,\,team\,\, i\,\, played\,\, in\,\, g
 0 \quad &\mathrm{otherwise}
 \end{cases},
 $$
+
 This means that each row of $A$ has exactly two non-zero entries, with a $1$ in the column of the team that played and won, and a $-1$ in the column of the team
 that played and lost.
 
-(a) Formulate the problem of finding the maximum likelihood estimate of team abilities, $\hat{a} \in \mathbb{R}^n$,
-given the outcomes, as a convex optimization problem. Because the optimal solution can be shifted by a constant, you should specify a prior constraint on the first variable $\hat{a}_0 = 0$. In order to keep the estimates bounded, an additional
-set of prior constraints $\hat{a}_i \in [-3, 3]$ should be included in the problem formulation, and you should take $\sigma = 0.25$ to be a constant value rather than a variable. Also, we
-note that if a constant is added to all team abilities, there is no change in the probabilities of
-game outcomes. This means that $\hat{a}$ is determined only up to a constant, like a potential. But
-this doesn’t affect the ML estimation problem, or any subsequent predictions made using the
-estimated parameters.
+(a) Formulate the problem of finding the maximum likelihood estimate of team abilities, $\hat{a} \in \mathbb{R}^n$, given the outcomes, as a convex optimization problem. Because the optimal solution can be shifted by a constant, you should specify a prior constraint on the first variable $\hat{a}_0 = 0$. 
 
-(b) Find $\hat{a}$ for the team data by the game incidence matrix [AMat_train.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/AMat_train.csv). (This matrix gives the
-outcomes for a tournament in which each team plays each other team once.) You may find
-the CVX function `log_normcdf` helpful for this problem. Remember that the cumulative distribution function of a log-concave distribution is log-concave,
-and also that it is vectorized. Hint: the $l$th row of $A\mathrm{a} = 
-a_{\mathrm{win},l}-a_{\mathrm{lose},l}$. 
+In order to keep the estimates bounded, an additional set of prior constraints $\hat{a}_i \in [-3, 3]$ should be included in the problem formulation, and you should take $\sigma = 0.25$ to be a constant value rather than a variable. Also, we note that if a constant is added to all team abilities, there is no change in the probabilities of game outcomes. This means that $\hat{a}$ is determined only up to a constant, like a potential. But this doesn’t affect the ML estimation problem, or any subsequent predictions made using the estimated parameters.
+
+(b) Find $\hat{a}$ for the team data by the game incidence matrix [AMat_train.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/AMat_train.csv). (This matrix gives the outcomes for a tournament in which each team plays each other team once.) You may find
+the CVX function `log_normcdf` helpful for this problem. 
+
+Remember that the cumulative distribution function of a log-concave distribution is log-concave, and also that it is vectorized. Hint: the $l$th row of $A\mathrm{a} =a_{\mathrm{win},l}-a_{\mathrm{lose},l}$.
 
 (c) Use the maximum likelihood estimate $\hat{a}$ found in part (b) to predict the outcomes of next
 year’s tournament games, given in the file [team_data_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/team_data_test.csv), using 
