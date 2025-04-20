@@ -32,16 +32,25 @@ $$
 
 where $(u)_+ = \mathrm{max}\{u, 0\}$. The multi-label SVM chooses $A$ and $\mathbf{b}$ to minimize $L(A, b) + \mu\|A\|_F^2,$ subject to $\mathbf{1}^T \mathbf{b} = 0$, where $\mu > 0$ is a regularization parameter. (Several variations on this are possible, such as regularizing b as well, or replacing the Frobenius norm squared with the sum of norms of the columns of A.). The Frobenius norm is a generalization of the $2$-norm from vectors to matrices, it is defined as $\|A\|_F = \left(\sum_{ij} A_{ij}^2\right)^{1/2}$ and implemented in `CVX` using `norm(A,'fro')`. 
 
-(a) Show how to find $A$ and $\mathbf{b}$ using convex optimization. Be sure to justify any changes of
-variables or reformulation (if needed), and convexity of the objective and constraints in your
-formulation.
+(a) Show how to find $A$ and $\mathbf{b}$ using convex optimization. Be sure to justify any changes of variables or reformulation (if needed), and convexity of the objective and constraints in your formulation.
 
 (b) Carry out multi-label SVM on the data given in [multi_label_svm_data.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/multi_label_svm_data.csv). 
 
 Use the data given in $\mathbf{X}$ and $y$ to fit the SVM model, for a range of values of $\mu$. Use the data given in [multi_label_svm_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/multi_label_svm_test.csv) to test the SVM models. Plot the
 test set classification error rate (i.e., the fraction of data examples in the test set for which $\hat{y} \neq y$) versus $\mu$.
 
-You don’t need to try more than 10 or 20 values of $\mu$, and we suggest choosing them uniformly on a `log` scale, from (say) $10^{−2}$ to $10^2$ .
+You don’t need to try more than 10 or 20 values of $\mu$, and we suggest choosing them uniformly on a `log` scale, from (say) $10^{−2}$ to $10^2$.
+
+### Problem 1 Solution
+
+```{python}
+# load dependencies
+import cvxpy as cp
+import numpy as np
+import pandas as pd
+
+
+```
 
 ## Problem 2: Maximum Likelihood Prediction of Team Abilities (Adapted from Exercise 7.4 in Convex Optimization Extended Exercises)
 
@@ -80,21 +89,15 @@ $$
 \hat{y}^{(i)} = \mathrm{sign}(\hat{a}_{j^{(i)}} − \hat{a}_{k^{(i)}})
 $$ 
 
-The first two rows of this file contain the indices of the two teams playing, and the third column is $1$ if the first team won and $-1$ otherwise.  Compare
-the predictions predictions based on $\hat{a}$ with the actual outcomes, given in the third column of test. Give the
-fraction of correctly predicted outcomes.
-The games played in train and test are the same, so another, simpler method for predicting
-the outcomes in test it to just assume the team that won last year’s match will also win this
-year’s match. You can find a similarly structured matrix in the file [team_data_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/team_data_test.csv), or you can construct it from the game incidence matrix. Give the percentage of correctly predicted outcomes using this simple method.
+The first two rows of this file contain the indices of the two teams playing, and the third column is $1$ if the first team won and $-1$ otherwise. 
 
+Compare the predictions predictions based on $\hat{a}$ with the actual outcomes, given in the third column of test. Give the fraction of correctly predicted outcomes.
+
+The games played in train and test are the same, so another, simpler method for predicting the outcomes in test it to just assume the team that won last year’s match will also win this year’s match. You can find a similarly structured matrix in the file [team_data_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/team_data_test.csv), or you can construct it from the game incidence matrix. Give the percentage of correctly predicted outcomes using this simple method.
 
 ## Problem 3: Flux balance analysis in systems biology. (Exercise 21.3 in CVX Additional Exercises)
 
-Flux balance analysis is based on a very simple model of
-the reactions going on in a cell, keeping track only of the gross rate of consumption and production
-of various chemical species within the cell. Based on the known stoichiometry of the reactions, and
-known upper bounds on some of the reaction rates, we can compute bounds on the other reaction
-rates, or cell growth, for example.
+Flux balance analysis is based on a very simple model of the reactions going on in a cell, keeping track only of the gross rate of consumption and production of various chemical species within the cell. Based on the known stoichiometry of the reactions, and known upper bounds on some of the reaction rates, we can compute bounds on the other reaction rates, or cell growth, for example.
 
 We focus on $m$ metabolites in a cell, labeled $M_1$ , . . . , $M_m$ . There are $n$ reactions going on, labeled
 $R_1$ , . . . , $R_n$ , with nonnegative reaction rates $v_1$ , . . . , $v_n$ . In our particular case, we will be working with a simplified model of cell metabolism having 9 reactions and 6 metabolites. Each reaction has a (known) stoichiometry,
