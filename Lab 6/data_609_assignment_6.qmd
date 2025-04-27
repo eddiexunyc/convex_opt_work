@@ -7,12 +7,12 @@ author: Eddie Xu
 
 ## Instructions
 
-Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file,
-I recommend python, julia, or R. 
+Please submit a .qmd file along with a rendered pdf to the Brightspace page for this assignment. You may use whatever language you like within your qmd file, I recommend python, julia, or R. 
 
 ## Problem 1: Multi-Label Support Vector Machine (CVX Additional Exercises 6.18)
 
 The basic SVM described in chapter 8 of the book is used for classification of data with two labels. In this problem we explore an extension of SVM that can be used to carry out classification of data with more than two labels. Our data consists of pairs: 
+
 $(\mathbf{x}_i , y_i ) \in \mathbf{R}^n \times \{1, \dots , K\},\, i = 1, \dots , m$ 
 
 where $\mathbf{x}_i$ is the feature vector and $y_i$ is the label of the $i$th data point. (So the labels can take the values $1, \dots , K$.) 
@@ -43,12 +43,72 @@ You don’t need to try more than 10 or 20 values of $\mu$, and we suggest choos
 
 ### Problem 1 Solution
 
+The problem can be solved using convex optimization because the constraint is affline, therfore it is convex. The hinge loss term is convex and the regulation term, robenius norm squared term is also convex in A.
+
 ```{python}
 # load dependencies
 import cvxpy as cp
 import numpy as np
 import pandas as pd
 
+# load training and test data
+svm_train_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/multi_label_svm_data.csv'
+svm_test_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/multi_label_svm_test.csv'
+svm_train_data = pd.read_csv(svm_train_url)
+svm_test_data  = pd.read_csv(svm_test_url)
+
+# split both data
+y_train = svm_train_data.iloc[:, 0].values.astype(int)
+X_train = svm_train_data.iloc[:, 1:].values
+
+y_test = svm_test_data.iloc[:, 0].values.astype(int)
+X_test = svm_test_data.iloc[:, 1:].values
+
+m, n = X_train.shape   # m = number of training examples, n = number of features
+K = len(np.unique(y_train))  # number of classes
+
+# Range of mu values (logspace from 10^-2 to 10^2)
+mu_values = np.logspace(-2, 2, 20)
+test_errors = []
+
+for mu in mu_values:
+    # Define variables
+    A = cp.Variable((K, n))
+    b = cp.Variable(K)
+    xi = cp.Variable(m)
+
+    constraints = [xi >= 0, cp.sum(b) == 0]  # xi non-negative and 1^T b = 0
+
+    # Add constraints for each data point and each incorrect class
+    for i in range(m):
+        x_i = cp.Constant(X_train[i, :])  # only ONCE
+        for k in range(K):
+            if k != (y_train[i] - 1):  # remember y_train[i] is 1-based
+                constraints.append(xi[i] >= 1 + cp.matmul(A[k, :], x_i) + b[k] - cp.matmul(A[y_train[i]-1, :], x_i) - b[y_train[i]-1])
+
+    # Define the objective
+    objective = cp.Minimize(cp.sum(xi) + mu * cp.norm(A, 'fro')**2)
+
+    # Solve the problem
+    prob = cp.Problem(objective, constraints)
+    prob.solve(solver=cp.SCS, verbose=False)  # You can try different solvers (SCS or ECOS)
+
+    # Prediction on test set
+    f_test = (A.value @ X_test.T) + b.value[:, np.newaxis]  # shape (K, number of test samples)
+    y_pred = np.argmax(f_test, axis=0) + 1  # +1 to match labels 1..K
+
+    # Calculate test error
+    test_error = np.mean(y_pred != y_test)
+    test_errors.append(test_error)
+
+# Plotting
+plt.figure(figsize=(8, 5))
+plt.semilogx(mu_values, test_errors, marker='o')
+plt.xlabel(r'$\mu$')
+plt.ylabel('Test Error Rate')
+plt.title('Multi-label SVM Test Error vs Regularization ($\mu$)')
+plt.grid(True)
+plt.show()
 
 ```
 
