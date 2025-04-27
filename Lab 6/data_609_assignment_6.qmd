@@ -1,6 +1,6 @@
 ---
 title: "DATA 609 - Homework 6: Applications to Stats and Machine Learning"
-format: html
+format: pdf
 editor: source
 author: Eddie Xu
 ---
@@ -188,44 +188,41 @@ prob = cp.Problem(cp.Maximize(objective), constraints)
 # solve the problem
 prob.solve(solver='ECOS', abstol=1e-5, reltol=1e-5, max_iters=10000)
 
+# print result
 ahat = a.value
 print("\nEstimated team abilities (ahat):\n", ahat)
 
-# Make sure team_data_test.csv is in your working directory
+# load the test data
 test_data_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/team_data_test.csv'
 test_data = pd.read_csv(test_data_url).values
 
-# --- Unpack the test data ---
-team1_indices = test_data[:, 0].astype(int)  # First team (winner if label = 1)
-team2_indices = test_data[:, 1].astype(int)  # Second team
-actual_outcomes = test_data[:, 2]            # +1 if team1 won, -1 otherwise
+# split the test data into team 1 and team 2
+team1_indices = test_data[:, 0].astype(int)  
+team2_indices = test_data[:, 1].astype(int)  
+actual_outcomes = test_data[:, 2]            
 
-# --- Predict outcomes based on ahat ---
-# (You should already have "ahat" from part (b))
+# calculate the predicted value based on a_hat
+
 predictions = np.sign(ahat[team1_indices] - ahat[team2_indices])
 
-# --- Compute Accuracy ---
+# define and calculate accuracy
 correct = np.sum(predictions == actual_outcomes)
 total = len(actual_outcomes)
 accuracy = correct / total
 
-# --- Simple prediction method: assume same outcome as last year ---
-
+# apply the prediction
 last_year_winners = np.argmax(A == 1, axis=1)
 last_year_losers = np.argmax(A == -1, axis=1)
-
-# Predict: team who won last year will win again
 simple_predictions = np.where(
     team1_indices == last_year_winners, 1,
     np.where(team2_indices == last_year_winners, -1, 0)
 )
 
-# Compare simple predictions with actual outcomes
+# compare the predicted value with the actual outcome
 correct_simple = np.sum(simple_predictions == actual_outcomes)
 accuracy_simple = correct_simple / total
 
 print(f"\nPrediction accuracy assuming last year's winner wins again: {accuracy_simple:.4f} ({accuracy_simple*100:.2f}%)")
-
 ```
 
 ## Problem 3: Flux balance analysis in systems biology. (Exercise 21.3 in CVX Additional Exercises)
@@ -259,7 +256,7 @@ v \succeq 0 \\
 v \preceq v^{\mathrm{max}} 
 $$
 
-The questions below pertain to the data found in [fba_S.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/fba_S.csv) and[fba_vmax.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/fba_vmax.csv), which contain the Stoichiometric Matrix and the upper bounds on the reaction fluxes, respectively. This exercise was inspired by the following paper: [Segre et all 2003](https://www.liebertpub.com/doi/abs/10.1089/153623103322452413)
+The questions below pertain to the data found in [fba_S.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/fba_S.csv) and [fba_vmax.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/fba_vmax.csv), which contain the Stoichiometric Matrix and the upper bounds on the reaction fluxes, respectively. This exercise was inspired by the following paper: [Segre et all 2003](https://www.liebertpub.com/doi/abs/10.1089/153623103322452413)
 
 (a) Find the maximum possible cell growth rate $G^{\star}$ , as well as optimal Lagrange multipliers for the reaction rate limits. How sensitive is the maximum growth rate to the various reaction rate limits?
 
@@ -270,3 +267,63 @@ Knocking out a set of genes associated with some reactions has the effect of set
 If the maximum growth rate becomes small enough or zero, it is reasonable to guess that knocking out the set of genes will kill the cell. An essential gene is one that when knocked out reduces the maximum growth rate below a given threshold $G^{\mathrm{min}}$ . (Note that $G_n$ is always an essential gene.) 
 
 A synthetic lethal is a pair of non-essential genes that when knocked out reduces the maximum growth rate below the threshold. Find all essential genes and synthetic lethals for the given problem instance, using the threshold $G^{\mathrm{min}} = 0.2G^{\star}$ .
+
+### Problem 3(a) and (b) Solution
+
+```{python}
+# load dependencies
+import numpy as np
+import pandas as pd
+from scipy.optimize import linprog
+from itertools import combinations
+
+# load data
+fba_s_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/fba_S.csv'
+fba_vmax_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/fba_vmax.csv'
+
+# define the data
+S = pd.read_csv(fba_s_url, index_col = 0).values
+vmax = pd.read_csv(fba_vmax_url, index_col= 0).values.flatten()
+S = np.array(S, dtype=float).T
+vmax = np.array(vmax, dtype=float)
+
+# define variables
+c = np.zeros(9)
+c[8] = -1  
+A_eq = S
+b_eq = np.zeros(S.shape[0])
+bounds = [(0, vmax[i]) for i in range(9)]
+
+# define and solve the max growth
+res = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds, method='highs')
+G_star = res.x[8]
+
+# define the duality of essential and nonessential
+
+dual_vmax = res.upper
+G_min = 0.2 * G_star
+essential = []
+for i in range(9):
+    vmax_ko = vmax.copy()
+    vmax_ko[i] = 0
+    bounds_ko = [(0, vmax_ko[j]) for j in range(9)]
+    res_ko = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds_ko, method='highs')
+    if not res_ko.success or res_ko.x[8] < G_min:
+        essential.append(i+1)
+
+nonessential = [i for i in range(9) if (i+1) not in essential]
+synthetic = []
+for i, j in combinations(nonessential, 2):
+    vmax_ko = vmax.copy()
+    vmax_ko[i] = vmax_ko[j] = 0
+    bounds_ko = [(0, vmax_ko[k]) for k in range(9)]
+    res_ko = linprog(c, A_eq=A_eq, b_eq=b_eq, bounds=bounds_ko, method='highs')
+    if not res_ko.success or res_ko.x[8] < G_min:
+        synthetic.append((i+1, j+1))
+
+# print result
+print(f"Maximum growth rate G* = {G_star:.4f}")
+print("Essential genes (reactions):", essential)
+print("Synthetic lethal pairs:", synthetic)
+print("Dual values for reaction bounds:", dual_vmax)
+```
