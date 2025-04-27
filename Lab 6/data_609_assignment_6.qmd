@@ -147,21 +147,85 @@ You may find the CVX function `log_normcdf` helpful for this problem.
 
 Remember that the cumulative distribution function of a log-concave distribution is log-concave, and also that it is vectorized. Hint: the $l$th row of $A\mathrm{a} =a_{\mathrm{win},l}-a_{\mathrm{lose},l}$.
 
-(c) Use the maximum likelihood estimate $\hat{a}$ found in part (b) to predict the outcomes of next
-year’s tournament games, given in the file [team_data_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/team_data_test.csv), using 
+(c) Use the maximum likelihood estimate $\hat{a}$ found in part (b) to predict the outcomes of next year’s tournament games, given in the file [team_data_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/team_data_test.csv), using 
 $$
 \hat{y}^{(i)} = \mathrm{sign}(\hat{a}_{j^{(i)}} − \hat{a}_{k^{(i)}})
 $$ 
 
-The first two rows of this file contain the indices of the two teams playing, and the third column is $1$ if the first team won and $-1$ otherwise. 
-
-Compare the predictions predictions based on $\hat{a}$ with the actual outcomes, given in the third column of test. Give the fraction of correctly predicted outcomes.
+The first two rows of this file contain the indices of the two teams playing, and the third column is $1$ if the first team won and $-1$ otherwise. Compare the predictions predictions based on $\hat{a}$ with the actual outcomes, given in the third column of test. Give the fraction of correctly predicted outcomes.
 
 The games played in train and test are the same, so another, simpler method for predicting the outcomes in test it to just assume the team that won last year’s match will also win this year’s match. You can find a similarly structured matrix in the file [team_data_test.csv](https://github.com/georgehagstrom/DATA609Spring2025/blob/main/website/assignments/labs/labData/team_data_test.csv), or you can construct it from the game incidence matrix. Give the percentage of correctly predicted outcomes using this simple method.
 
-### Problem 2 Solution
+### Problem 2(b) and (c) Solution
 
 ```{python}
+# load dependencies
+import numpy as np
+import cvxpy as cp
+import pandas as pd
+
+# load data
+train_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/AMat_train.csv'
+A = pd.read_csv(train_url).values
+
+# define variables
+m, n = A.shape
+a = cp.Variable(n)
+sigma = 0.25
+
+# define and calculate residual
+residual = A @ a
+
+# define the objective
+objective = cp.sum(cp.log_normcdf(residual / sigma))
+
+# define the constraint
+constraints = [a[0] == 0, a >= -3, a <= 3]
+
+# define the problem
+prob = cp.Problem(cp.Maximize(objective), constraints)
+
+# solve the problem
+prob.solve(solver='ECOS', abstol=1e-5, reltol=1e-5, max_iters=10000)
+
+ahat = a.value
+print("\nEstimated team abilities (ahat):\n", ahat)
+
+# Make sure team_data_test.csv is in your working directory
+test_data_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/team_data_test.csv'
+test_data = pd.read_csv(test_data_url).values
+
+# --- Unpack the test data ---
+team1_indices = test_data[:, 0].astype(int)  # First team (winner if label = 1)
+team2_indices = test_data[:, 1].astype(int)  # Second team
+actual_outcomes = test_data[:, 2]            # +1 if team1 won, -1 otherwise
+
+# --- Predict outcomes based on ahat ---
+# (You should already have "ahat" from part (b))
+predictions = np.sign(ahat[team1_indices] - ahat[team2_indices])
+
+# --- Compute Accuracy ---
+correct = np.sum(predictions == actual_outcomes)
+total = len(actual_outcomes)
+accuracy = correct / total
+
+# --- Simple prediction method: assume same outcome as last year ---
+
+last_year_winners = np.argmax(A == 1, axis=1)
+last_year_losers = np.argmax(A == -1, axis=1)
+
+# Predict: team who won last year will win again
+simple_predictions = np.where(
+    team1_indices == last_year_winners, 1,
+    np.where(team2_indices == last_year_winners, -1, 0)
+)
+
+# Compare simple predictions with actual outcomes
+correct_simple = np.sum(simple_predictions == actual_outcomes)
+accuracy_simple = correct_simple / total
+
+print(f"\nPrediction accuracy assuming last year's winner wins again: {accuracy_simple:.4f} ({accuracy_simple*100:.2f}%)")
+
 ```
 
 ## Problem 3: Flux balance analysis in systems biology. (Exercise 21.3 in CVX Additional Exercises)
