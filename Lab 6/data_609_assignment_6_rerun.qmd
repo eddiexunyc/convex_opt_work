@@ -174,7 +174,7 @@ $$
 \begin{aligned}
 \max_{a \in \mathbb{R}^n} \quad & \sum_{l=1}^m \log\left( \Phi\left( \frac{(A a)_l}{0.25} \right) \right) \\
 \text{subject to} \quad & a_0 = 0, \\
-& a_i \in [-3, 3], \quad \forall i = 1, \dotsc, n
+& 1`a_i \in [-3, 3], \quad \forall i = 1, \dotsc, n
 \end{aligned}
 $$
 

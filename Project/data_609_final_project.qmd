@@ -1,0 +1,31 @@
+---
+title: "DATA 609: Final Project - A Simple Convex Optimization on Regulatory Financial Reporting"
+format: html
+editor: source
+author: Eddie Xu
+---
+
+### Introduction
+
+All financial institutions are required to report their financial data in accordance with multiple regulatory frameworks such as Basel III and Dodd Frank Act. Due to the complexities with some of the framework, it can be challenging for some financial companies, particularly smaller regional or community banks, to maximize their returns while ensure that they are to be in regulatory compliance on limited resources and times. Because of that, it can cause potential reporting errors and may lead to financial institutions being penalized with fines of millions dollars and may have a significant impact on the financial market.
+
+For this project, the purpose will be using convex optimization applications for a simple regulatory financial reporting problem. Specifically, the optimal allocation of a bank's capital across different assets (cash, bonds, stocks, etc) will be determined in order to maximize returns while ensuring compliance with regulatory capital requirements. 
+
+### Data Source
+
+
+### Data Wrangling 
+
+### Convex Optimization
+
+```{python}
+
+
+```
+
+### Observation & Insights
+
+
+
+
+
