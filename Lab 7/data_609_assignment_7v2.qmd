@@ -1,6 +1,6 @@
 ---
 title: "DATA 609 - Homework 7: Nonconvex Optimization and Deep Learning"
-format: html
+format: pdf
 editor: source
 author: Eddie Xu
 ---
@@ -281,7 +281,9 @@ plt.show()
 
 ## Problem 2: Shallow Nets and MNIST
 
-For this exercise, we will work on one of the standard model problems in Machine Learning, classifying handwritten digits. We will use an adaptation of the neural network code from your reading assignment to pytorch, which is one of the leading frameworks for training neural networks. pytorch is fairly flexible, you can use it with the CPU on your personal computer, with GPUs, and even on computing clusters. If you have trouble getting pytorch to work on your own computer I recommend trying in on google colab, or alternatively you are welcome to develop your own implementation. This and the next assignment have helper code in the provided ipython notebook Lab 7 Helper Noteook
+For this exercise, we will work on one of the standard model problems in Machine Learning, classifying handwritten digits. We will use an adaptation of the neural network code from your reading assignment to pytorch, which is one of the leading frameworks for training neural networks. pytorch is fairly flexible, you can use it with the CPU on your personal computer, with GPUs, and even on computing clusters. 
+
+If you have trouble getting pytorch to work on your own computer, I recommend trying in on google colab, or alternatively you are welcome to develop your own implementation. This and the next assignment have helper code in the provided ipython notebook Lab 7 Helper Noteook
 
 First, you should acquire the MNIST dataset. This can be downloaded automatically using pytorch via the following code chunk:
 
@@ -309,7 +311,9 @@ First, you should acquire the MNIST dataset. This can be downloaded automaticall
 # test_dataset = datasets.MNIST('data/', train=False, transform=transform)
 ```
 
-We are going to train a simple neural network to classify the MNIST images. The neural network has an input layer of 784 neurons (one for each pixel), a 30 neuron hidden layer, and a 10 neuron output layer, which provided a weight that corresponds to the predictions of the neural network for each class. Initially we will use sigmoidal neurons to process the inputs. Throughout the rest of the assignment you will use and improve the code in this file to study the performance of different combinations of network structure, optimization algorithm choice, hyperparameters, and activation functions.
+We are going to train a simple neural network to classify the MNIST images. The neural network has an input layer of 784 neurons (one for each pixel), a 30 neuron hidden layer, and a 10 neuron output layer, which provided a weight that corresponds to the predictions of the neural network for each class. Initially we will use sigmoidal neurons to process the inputs. 
+
+Throughout the rest of the assignment, you will use and improve the code in this file to study the performance of different combinations of network structure, optimization algorithm choice, hyperparameters, and activation functions.
 
 The initial configuration of the neural network uses stochastic gradient descent without momentum. The following code sets several key hyperparameters and trains the neural network:
 
@@ -378,11 +382,11 @@ and also in the class function:
 
 The default set of hyperparameters lead to a neural network that successfully trains, and has an ultimate out of sample accuracy of just below 0.95 after 30 epochs of training on my computer.
 
-Validate this result by executing the train command with the parameters described above. Next, the learning rate is one of the most important hyperparameters in machine learning. Train the same structure of neural network with a range of different learning rates both higher and lower. Make sure you find a learning rate high enough so that the neural network performance is poor. What was the learning rate that led to the best accuracy at the end of 30 epochs? Plot the test accuracy as a function of epochs (it is one of the outputs of the train function) for all of the learning rates that you tested.
+(a) Validate this result by executing the train command with the parameters described above. Next, the learning rate is one of the most important hyperparameters in machine learning. Train the same structure of neural network with a range of different learning rates both higher and lower. Make sure you find a learning rate high enough so that the neural network performance is poor. What was the learning rate that led to the best accuracy at the end of 30 epochs? Plot the test accuracy as a function of epochs (it is one of the outputs of the train function) for all of the learning rates that you tested.
 
-How does the ADAM optimizer handle this problem? Modify the neural network code so that the optimizer is ADAM optimizer (you will see commented code in the train function). Then train a neural network using ADAM again with a range of different learning rates (including the same starting point  as in part(a)). Compare the behavior of the learning curves, the final accuracy, and the values of the learning rates that were most successful with part (a).
+(b) How does the ADAM optimizer handle this problem? Modify the neural network code so that the optimizer is ADAM optimizer (you will see commented code in the train function). Then train a neural network using ADAM again with a range of different learning rates (including the same starting point  as in part(a)). Compare the behavior of the learning curves, the final accuracy, and the values of the learning rates that were most successful with part (a).
 
-How good can you make your 3-layer network? You don’t need to do an exhaustive search of all possible options (which would take forever) but experiment with the optimization algorithm, the learning rate and the other hyper-parameters. For example, you could include more or fewer neurons in the hidden layer, change the values of the betas in ADAM or the momentum in SGD, alter the batch size in the data loader, change the learning rate, increase or decrease the weight decay (which is L2 regularization), or change the number of training epochs.
+(c) How good can you make your 3-layer network? You don’t need to do an exhaustive search of all possible options (which would take forever) but experiment with the optimization algorithm, the learning rate and the other hyper-parameters. For example, you could include more or fewer neurons in the hidden layer, change the values of the betas in ADAM or the momentum in SGD, alter the batch size in the data loader, change the learning rate, increase or decrease the weight decay (which is L2 regularization), or change the number of training epochs.
 
 Some tips: - For this problem I don’t think it is likely to have an accuracy above 0.99 without expanding the data - Larger batch sizes have less “noise” so might need more regularization. They also sometimes require larger learning rates - The learning rate scheduler will decrease the learning rate by a factor of $gamma\$ every steps number of epochs
 
@@ -397,12 +401,10 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 
-# ---------------------
-# 1. Load and Prepare Data
-# ---------------------
+# run the already defined functions 
 transform = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Lambda(lambda x: x.view(-1))  # Flatten 28x28 image to 784-dim vector
+    transforms.Lambda(lambda x: x.view(-1))
 ])
 
 train_dataset = datasets.MNIST('data/', train=True, download=True, transform=transform)
@@ -411,9 +413,6 @@ test_dataset = datasets.MNIST('data/', train=False, transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=10, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=10, shuffle=False)
 
-# ---------------------
-# 2. Define the Network
-# ---------------------
 class Network(nn.Module):
     def __init__(self, sizes, activation='sigmoid'):
         super(Network, self).__init__()
@@ -430,9 +429,7 @@ class Network(nn.Module):
             x = F.sigmoid(layer(x)) if self.activation == 'sigmoid' else F.relu(layer(x))
         return self.layers[-1](x)
 
-# ---------------------
-# 3. Training Function
-# ---------------------
+# define the train function
 def train(network, train_loader, test_loader, epochs=30, eta=0.001, optimizer_type='SGD'):
     criterion = nn.CrossEntropyLoss()
     if optimizer_type == 'SGD':
@@ -470,9 +467,7 @@ def train(network, train_loader, test_loader, epochs=30, eta=0.001, optimizer_ty
     
     return test_acc_list
 
-# ---------------------
-# 4. Run Experiments
-# ---------------------
+# initiate the optimzers and run it
 learning_rates = [0.0001, 0.001, 0.01, 0.05]
 optimizers = ['SGD', 'Adam']
 results = {}
@@ -484,9 +479,7 @@ for opt in optimizers:
         acc = train(model, train_loader, test_loader, epochs=30, eta=lr, optimizer_type=opt)
         results[(opt, lr)] = acc
 
-# ---------------------
-# 5. Plot Results
-# ---------------------
+# plot
 plt.figure(figsize=(12, 7))
 for key, acc in results.items():
     label = f"{key[0]} (lr={key[1]})"
@@ -498,21 +491,24 @@ plt.title("Test Accuracy vs Epochs for Different Optimizers and Learning Rates")
 plt.legend()
 plt.grid(True)
 plt.show()
-
 ```
 
 ## Problem 3: Deep Nets: Overcoming Gradients
 
-In deep networks, the gradients for the neural network weights can either vanish or explode due to the compositional nature of the network. This typically happens for weights near the input layer. In order to observe vanishing gradients we need to calculate the size of the gradients of the loss function with respect to each weight. The neural network training routine has commented code that computes the norm of the gradients of the input layer and the norm of the gradients of the output layer and divides and averages them across all the batches in an epoch. Uncomment the code (and modify the print and return statement) so that the gradients are computed and the gradient ratio output and saved.
-Then try training a deep neural network. I recommend beginning with the architecture net = Network([784,30,30,30,30,30,30,30,30,10]). Train this neural network. You will almost certainly find that the training does not succeed. What are the gradient ratios that you observe during the training?
+(a) In deep networks, the gradients for the neural network weights can either vanish or explode due to the compositional nature of the network. This typically happens for weights near the input layer. In order to observe vanishing gradients we need to calculate the size of the gradients of the loss function with respect to each weight. 
+
+The neural network training routine has commented code that computes the norm of the gradients of the input layer and the norm of the gradients of the output layer and divides and averages them across all the batches in an epoch. Uncomment the code (and modify the print and return statement) so that the gradients are computed and the gradient ratio output and saved. Then try training a deep neural network. 
+
+I recommend beginning with the architecture net = Network([784,30,30,30,30,30,30,30,30,10]). Train this neural network. You will almost certainly find that the training does not succeed. What are the gradient ratios that you observe during the training?
 
 If your computer cannot train this network, you can try this problem with a shallower network, or my recommendation is to use only a single epoch of training which should still demonstrate the vanishing gradient problem.
 
-There are several techniques to deal with vanishing (or exploding) gradients. These include using neurons with different activation functions or using different normalization schemes. The forward method in the Network class defines the activation functions. Change the activation function from sigmoid to relu and change the initialization from Xavier.normal_ to kaiming.uniform_ (which is more optimal for deep ReLU neurons) and train the deep neural network. How does the gradient ratio change? How does the test accuracy compare to the shallow net accuracy you achieved in problem 2?
+(b) There are several techniques to deal with vanishing (or exploding) gradients. These include using neurons with different activation functions or using different normalization schemes. The forward method in the Network class defines the activation functions. Change the activation function from sigmoid to relu and change the initialization from Xavier.normal_ to kaiming.uniform_ (which is more optimal for deep ReLU neurons) and train the deep neural network. How does the gradient ratio change? How does the test accuracy compare to the shallow net accuracy you achieved in problem 2?
 
-Deep neural networks are a superior architecture of image classification problems than shallow networks, however typically the dense structure that we have implemented here is not used. Instead the neural networks usually have several convolutionary layers at the beginning. With some effort and experimentation, it should still be possible to achieve a very high accuracy with a dense neural network. Experiment with the network architecture and the hyperparameters and see how good you can make your deep/dense network. You can try a combination of increasing the number of neurons in the hidden layers or incrasing the depth of the network. A structure that often works is one which decreases the number of neurons per hidden layer steadily from the input layer to the final layer (i.e. starting at 784 and ending at 10). Can you improve upon the best shallow network that you constructed for problem 3?
+(c) Deep neural networks are a superior architecture of image classification problems than shallow networks, however typically the dense structure that we have implemented here is not used. Instead the neural networks usually have several convolutionary layers at the beginning. With some effort and experimentation, it should still be possible to achieve a very high accuracy with a dense neural network. Experiment with the network architecture and the hyperparameters and see how good you can make your deep/dense network. You can try a combination of increasing the number of neurons in the hidden layers or incrasing the depth of the network. A structure that often works is one which decreases the number of neurons per hidden layer steadily from the input layer to the final layer (i.e. starting at 784 and ending at 10). Can you improve upon the best shallow network that you constructed for problem 3?
 
 ```{python}
+# load dependencies
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -521,31 +517,28 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 
-# Load MNIST
+# load dataset
 transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))])
 train_dataset = datasets.MNIST('data/', train=True, download=True, transform=transform)
 test_dataset = datasets.MNIST('data/', train=False, transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=10, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=10, shuffle=False)
 
-# Define the network
+# use the applied function
 class Network(nn.Module):
-    def __init__(self, sizes, use_relu=False):
+    def __init__(self, sizes, activation='sigmoid'):
         super(Network, self).__init__()
-        self.use_relu = use_relu
+        self.activation = activation
         self.layers = nn.ModuleList()
-        for i in range(len(sizes)-1):
+        for i in range(len(sizes) - 1):
             layer = nn.Linear(sizes[i], sizes[i+1])
-            if use_relu:
-                nn.init.kaiming_uniform_(layer.weight, nonlinearity='relu')
-            else:
-                nn.init.xavier_normal_(layer.weight)
+            nn.init.xavier_normal_(layer.weight) if activation == 'sigmoid' else nn.init.kaiming_uniform_(layer.weight, nonlinearity='relu')
             nn.init.zeros_(layer.bias)
             self.layers.append(layer)
 
     def forward(self, x):
         for layer in self.layers[:-1]:
-            x = F.relu(layer(x)) if self.use_relu else torch.sigmoid(layer(x))
+            x = F.sigmoid(layer(x)) if self.activation == 'sigmoid' else F.relu(layer(x))
         return self.layers[-1](x)
 
 # Train function with gradient monitoring
@@ -567,7 +560,7 @@ def train(network, train_loader, test_loader, epochs=1, eta=0.001):
             loss = criterion(outputs, labels)
             loss.backward()
 
-            # Gradient norm monitoring
+            # gradient norm
             input_grad_norm = network.layers[0].weight.grad.norm().item()
             output_grad_norm = network.layers[-1].weight.grad.norm().item()
             input_grads += input_grad_norm
@@ -579,7 +572,7 @@ def train(network, train_loader, test_loader, epochs=1, eta=0.001):
         grad_ratio = (input_grads / n_batches) / (output_grads / n_batches + 1e-8)
         grad_ratios.append(grad_ratio)
 
-        # Evaluate on test data
+        # review test data
         network.eval()
         correct, total = 0, 0
         with torch.no_grad():
@@ -596,11 +589,11 @@ def train(network, train_loader, test_loader, epochs=1, eta=0.001):
 
     return grad_ratios, test_acc
 
-# Create deep network
-net = Network([784,30,30,30,30,30,30,30,30,10], use_relu=False)
+# define the deep learning network
+net = Network([784,30,30,30,30,30,30,30,30,10])
 ratios_sigmoid, acc_sigmoid = train(net, train_loader, test_loader, epochs=5)
 
-# Plot
+# plot
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
 plt.plot(ratios_sigmoid)
@@ -608,19 +601,5 @@ plt.title("Gradient Ratio (Input/Output) - Sigmoid")
 plt.subplot(1, 2, 2)
 plt.plot(acc_sigmoid)
 plt.title("Test Accuracy - Sigmoid")
-plt.show()
-
-# Now with ReLU + Kaiming
-net_relu = Network([784,30,30,30,30,30,30,30,30,10], use_relu=True)
-ratios_relu, acc_relu = train(net_relu, train_loader, test_loader, epochs=5)
-
-# Plot ReLU results
-plt.figure(figsize=(12, 5))
-plt.subplot(1, 2, 1)
-plt.plot(ratios_relu)
-plt.title("Gradient Ratio (Input/Output) - ReLU")
-plt.subplot(1, 2, 2)
-plt.plot(acc_relu)
-plt.title("Test Accuracy - ReLU")
 plt.show()
 ```

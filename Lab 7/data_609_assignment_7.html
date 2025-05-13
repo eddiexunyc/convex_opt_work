@@ -140,154 +140,798 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="problem-1-comparing-optimization-algorithms">Problem 1: Comparing Optimization Algorithms</h2>
 <p>Consider the function, <span class="math inline">\(f(x,y) = (1-x^2) + 100(y - x^2)^2)\)</span> which has a global minimum at, <span class="math inline">\(x = 1\)</span>. For this problem, you are going to explore using different optimization algorithms to find the global minimum, to gain an intuitive understanding of their different strengths and weaknesses.</p>
 <ol type="a">
-<li><p>Make a contour plot of this function. You should observe a that the contour lines are “banana-shaped” around the global minimum point, which lies in a deep valley. In technical terms, we would say that the gradient of this function is strongly anisotropic, a fact that can cause slow or no convergence for optimization algorithms.</p></li>
-<li><p>In the code chunk below I have python code for three different optimization algorithms,(1) stochastic gradient descent; (2) stochastic gradient descent with momentum, and (3) ADAM (ADAptive Moment Estimation). Starting at the initial point <span class="math inline">\(x= -4, y = -2\)</span>, use each algorithm to find the minimum of the function <span class="math inline">\(f\)</span>. Start with a learning rate of <span class="math inline">\(\kappa = 10^{-4}\)</span> for all three algorithms, and run the algorithm for <span class="math inline">\(10^5\)</span> timesteps. Plot the trajectories of each algorithm and the log base 10 of the error rate as a function of the time step. What do you notice about the performance of the difference algorithms, both in terms of convergence speed and ultimate accuracy?</p></li>
+<li>Make a contour plot of this function. You should observe a that the contour lines are “banana-shaped” around the global minimum point, which lies in a deep valley. In technical terms, we would say that the gradient of this function is strongly anisotropic, a fact that can cause slow or no convergence for optimization algorithms.</li>
 </ol>
-<div id="b703d8f2" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gd(grad, init, n_epochs<span class="op">=</span><span class="dv">1000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>):</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>])</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs):</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>eta<span class="op">*</span>(np.array(grad(params)))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>v</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gd_with_mom(grad, init, n_epochs<span class="op">=</span><span class="dv">5000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>, beta<span class="op">=</span><span class="fl">0.9</span>,gamma<span class="op">=</span><span class="fl">0.9</span>):</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init) <span class="co"># Start with initial condition</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>]) <span class="co"># Save the entire trajecotry</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init <span class="co"># Also save the initial condition to the trajectory</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span> <span class="co"># Starting with 0 momentum</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Epochs is borrowing term from machine learning</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Here it means timestep</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs): </span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>gamma<span class="op">*</span>v<span class="op">+</span>(np.array(grad(params))) <span class="co"># Compute v</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>eta<span class="op">*</span>v  <span class="co"># Update the location</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params <span class="co"># Save the trajectory</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> adams(grad, init, n_epochs<span class="op">=</span><span class="dv">5000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>, gamma<span class="op">=</span><span class="fl">0.9</span>, beta<span class="op">=</span><span class="fl">0.99</span>,epsilon<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">8</span>):</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>])</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    grad_sq<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs):</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        g<span class="op">=</span>np.array(grad(params))</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>gamma<span class="op">*</span>v<span class="op">+</span>(<span class="dv">1</span><span class="op">-</span>gamma)<span class="op">*</span>g</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        grad_sq<span class="op">=</span>beta<span class="op">*</span>grad_sq<span class="op">+</span>(<span class="dv">1</span><span class="op">-</span>beta)<span class="op">*</span>g<span class="op">*</span>g</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        v_hat<span class="op">=</span>v<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>gamma<span class="op">**</span>(j<span class="op">+</span><span class="dv">1</span>))</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        grad_sq_hat<span class="op">=</span>grad_sq<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>beta<span class="op">**</span>(j<span class="op">+</span><span class="dv">1</span>))</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>eta<span class="op">*</span>np.divide(v_hat,np.sqrt(grad_sq_hat<span class="op">+</span>epsilon))</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="problem-1a-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-1a-solution">Problem 1(a) Solution</h3>
+<div id="7727116e" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load dependencies</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># define function</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prob_func(x, y):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">1</span> <span class="op">-</span> x)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">100</span> <span class="op">*</span> (y <span class="op">-</span> x<span class="op">**</span><span class="dv">2</span>)<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a grid of (x, y) values</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">400</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">400</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> prob_func(X, Y)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the contour</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>contours <span class="op">=</span> plt.contour(X, Y, Z, levels<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">1</span>, <span class="fl">3.5</span>, <span class="dv">20</span>), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>plt.clabel(contours, inline<span class="op">=</span><span class="va">True</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="dv">1</span>, <span class="dv">1</span>, <span class="st">'r*'</span>, markersize<span class="op">=</span><span class="dv">10</span>, label<span class="op">=</span><span class="st">'Global Minimum (1, 1)'</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Contour Plot of the function'</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_609_assignment_7_files/figure-html/cell-2-output-1.png" width="662" height="469" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="2" type="a">
+<li>In the code chunk below I have python code for three different optimization algorithms,(1) stochastic gradient descent; (2) stochastic gradient descent with momentum, and (3) ADAM (ADAptive Moment Estimation). Starting at the initial point <span class="math inline">\(x= -4, y = -2\)</span>, use each algorithm to find the minimum of the function <span class="math inline">\(f\)</span>. Start with a learning rate of <span class="math inline">\(\kappa = 10^{-4}\)</span> for all three algorithms, and run the algorithm for <span class="math inline">\(10^5\)</span> timesteps. Plot the trajectories of each algorithm and the log base 10 of the error rate as a function of the time step. What do you notice about the performance of the difference algorithms, both in terms of convergence speed and ultimate accuracy?</li>
+</ol>
+<div id="2c92a3ba" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># available defined function</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gd(grad, init, n_epochs<span class="op">=</span><span class="dv">1000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs):</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>eta<span class="op">*</span>(np.array(grad(params)))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>v</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gd_with_mom(grad, init, n_epochs<span class="op">=</span><span class="dv">5000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>, beta<span class="op">=</span><span class="fl">0.9</span>,gamma<span class="op">=</span><span class="fl">0.9</span>):</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init) <span class="co"># Start with initial condition</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>]) <span class="co"># Save the entire trajecotry</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init <span class="co"># Also save the initial condition to the trajectory</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span> <span class="co"># Starting with 0 momentum</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Epochs is borrowing term from machine learning</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Here it means timestep</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs): </span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>gamma<span class="op">*</span>v<span class="op">+</span>(np.array(grad(params))) <span class="co"># Compute v</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>eta<span class="op">*</span>v  <span class="co"># Update the location</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params <span class="co"># Save the trajectory</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> adams(grad, init, n_epochs<span class="op">=</span><span class="dv">5000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>, gamma<span class="op">=</span><span class="fl">0.9</span>, beta<span class="op">=</span><span class="fl">0.99</span>,epsilon<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">8</span>):</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    grad_sq<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs):</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        g<span class="op">=</span>np.array(grad(params))</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>gamma<span class="op">*</span>v<span class="op">+</span>(<span class="dv">1</span><span class="op">-</span>gamma)<span class="op">*</span>g</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        grad_sq<span class="op">=</span>beta<span class="op">*</span>grad_sq<span class="op">+</span>(<span class="dv">1</span><span class="op">-</span>beta)<span class="op">*</span>g<span class="op">*</span>g</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        v_hat<span class="op">=</span>v<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>gamma<span class="op">**</span>(j<span class="op">+</span><span class="dv">1</span>))</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        grad_sq_hat<span class="op">=</span>grad_sq<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>beta<span class="op">**</span>(j<span class="op">+</span><span class="dv">1</span>))</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>eta<span class="op">*</span>np.divide(v_hat,np.sqrt(grad_sq_hat<span class="op">+</span>epsilon))</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co"># load dependencies</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="co"># define function</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prob_func(x, y):</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">1</span> <span class="op">-</span> x)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">100</span> <span class="op">*</span> (y <span class="op">-</span> x<span class="op">**</span><span class="dv">2</span>)<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prob_func_grad(xy):</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> xy</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    dfdx <span class="op">=</span> <span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> x) <span class="op">-</span> <span class="dv">400</span> <span class="op">*</span> x <span class="op">*</span> (y <span class="op">-</span> x<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    dfdy <span class="op">=</span> <span class="dv">200</span> <span class="op">*</span> (y <span class="op">-</span> x<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([dfdx, dfdy])</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co"># intitalize the optimizer</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>init_point <span class="op">=</span> [<span class="op">-</span><span class="fl">4.0</span>, <span class="op">-</span><span class="fl">2.0</span>]</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>eta <span class="op">=</span> <span class="fl">1e-4</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="op">=</span> <span class="dv">100000</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a><span class="co"># run the optimizer</span></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>gd_traj <span class="op">=</span> gd(prob_func_grad, init_point, n_epochs<span class="op">=</span>n_epochs, eta<span class="op">=</span>eta)</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>mom_traj <span class="op">=</span> gd_with_mom(prob_func_grad, init_point, n_epochs<span class="op">=</span>n_epochs, eta<span class="op">=</span>eta)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>adam_traj <span class="op">=</span> adams(prob_func_grad, init_point, n_epochs<span class="op">=</span>n_epochs, eta<span class="op">=</span>eta)</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="co"># compute log10 error</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>true_min <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">1</span>])</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>gd_error <span class="op">=</span> np.log10(np.<span class="bu">sum</span>((gd_traj <span class="op">-</span> true_min)<span class="op">**</span><span class="dv">2</span>, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>mom_error <span class="op">=</span> np.log10(np.<span class="bu">sum</span>((mom_traj <span class="op">-</span> true_min)<span class="op">**</span><span class="dv">2</span>, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>adam_error <span class="op">=</span> np.log10(np.<span class="bu">sum</span>((adam_traj <span class="op">-</span> true_min)<span class="op">**</span><span class="dv">2</span>, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="co"># create a contour plot of the function</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="op">-</span><span class="fl">4.5</span>, <span class="fl">4.5</span>, <span class="dv">400</span>)</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">400</span>)</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>X, Y <span class="op">=</span> np.meshgrid(x, y)</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> prob_func(X, Y)</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="co"># plot results</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">6</span>))</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the contour with trajectories</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].contour(X, Y, Z, levels<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">1</span>, <span class="fl">3.5</span>, <span class="dv">20</span>), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(gd_traj[:, <span class="dv">0</span>], gd_traj[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Gradient Descent'</span>)</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(mom_traj[:, <span class="dv">0</span>], mom_traj[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Momentum'</span>)</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(adam_traj[:, <span class="dv">0</span>], adam_traj[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Adam'</span>)</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(<span class="dv">1</span>, <span class="dv">1</span>, <span class="st">'r*'</span>, markersize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].set_title(<span class="st">"Trajectories on Contour Plot (η = 1e-4)"</span>)</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].legend()</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the log error</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].plot(gd_error, label<span class="op">=</span><span class="st">'Gradient Descent'</span>)</span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].plot(mom_error, label<span class="op">=</span><span class="st">'Momentum'</span>)</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].plot(adam_error, label<span class="op">=</span><span class="st">'Adam'</span>)</span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_title(<span class="st">"Log10 of Squared Error vs Timestep (η = 1e-4)"</span>)</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_xlabel(<span class="st">"Timestep"</span>)</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_ylabel(<span class="st">"log10(Error)"</span>)</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].legend()</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_609_assignment_7_files/figure-html/cell-3-output-1.png" width="1526" height="564" class="figure-img"></p>
+</figure>
+</div>
+</div>
 </div>
 <ol start="3" type="a">
 <li><p>Perform the same experiment for the learning rate <span class="math inline">\(\kappa = 10^{-3}\)</span>, only comparing ADAM and gradient descent with momentum. You will likely observe that one of the methods does not converge, keep the same range of values for your trajectory/contour plot as you did in (b). Which method worked better with <span class="math inline">\(\kappa = 10^{3}\)</span>?</p></li>
 <li><p>Now perform a comparison between ADAM with <span class="math inline">\(\kappa=10^{-2}\)</span> against gradient descent with momentum using . What are the trade-offs between the two methods for these values of the learning rate?</p></li>
 </ol>
 </section>
+<section id="problem-1c-and-1d-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-1c-and-1d-solution">Problem 1(c) and 1(d) Solution</h3>
+<div id="c4faffc0" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load dependencies</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># define function</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prob_func(x, y):</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="dv">1</span> <span class="op">-</span> x)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">100</span> <span class="op">*</span> (y <span class="op">-</span> x<span class="op">**</span><span class="dv">2</span>)<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> prob_func_grad(xy):</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> xy</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    dfdx <span class="op">=</span> <span class="op">-</span><span class="dv">2</span> <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> x) <span class="op">-</span> <span class="dv">400</span> <span class="op">*</span> x <span class="op">*</span> (y <span class="op">-</span> x<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    dfdy <span class="op">=</span> <span class="dv">200</span> <span class="op">*</span> (y <span class="op">-</span> x<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([dfdx, dfdy])</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># set the applied the function</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> adams(grad, init, n_epochs<span class="op">=</span><span class="dv">5000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>, gamma<span class="op">=</span><span class="fl">0.9</span>, beta<span class="op">=</span><span class="fl">0.99</span>,epsilon<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">8</span>):</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    grad_sq<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs):</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        g<span class="op">=</span>np.array(grad(params))</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>gamma<span class="op">*</span>v<span class="op">+</span>(<span class="dv">1</span><span class="op">-</span>gamma)<span class="op">*</span>g</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        grad_sq<span class="op">=</span>beta<span class="op">*</span>grad_sq<span class="op">+</span>(<span class="dv">1</span><span class="op">-</span>beta)<span class="op">*</span>g<span class="op">*</span>g</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        v_hat<span class="op">=</span>v<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>gamma<span class="op">**</span>(j<span class="op">+</span><span class="dv">1</span>))</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        grad_sq_hat<span class="op">=</span>grad_sq<span class="op">/</span>(<span class="dv">1</span><span class="op">-</span>beta<span class="op">**</span>(j<span class="op">+</span><span class="dv">1</span>))</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>eta<span class="op">*</span>np.divide(v_hat,np.sqrt(grad_sq_hat<span class="op">+</span>epsilon))</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gd_with_mom(grad, init, n_epochs<span class="op">=</span><span class="dv">5000</span>, eta<span class="op">=</span><span class="dv">10</span><span class="op">**-</span><span class="dv">4</span>, beta<span class="op">=</span><span class="fl">0.9</span>,gamma<span class="op">=</span><span class="fl">0.9</span>):</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    params<span class="op">=</span>np.array(init) <span class="co"># Start with initial condition</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    param_traj<span class="op">=</span>np.zeros([n_epochs<span class="op">+</span><span class="dv">1</span>,<span class="dv">2</span>]) <span class="co"># Save the entire trajecotry</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    param_traj[<span class="dv">0</span>,]<span class="op">=</span>init <span class="co"># Also save the initial condition to the trajectory</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    v<span class="op">=</span><span class="dv">0</span> <span class="co"># Starting with 0 momentum</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Epochs is borrowing term from machine learning</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Here it means timestep</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n_epochs): </span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>        v<span class="op">=</span>gamma<span class="op">*</span>v<span class="op">+</span>(np.array(grad(params))) <span class="co"># Compute v</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>        params<span class="op">=</span>params<span class="op">-</span>eta<span class="op">*</span>v  <span class="co"># Update the location</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>        param_traj[j<span class="op">+</span><span class="dv">1</span>,]<span class="op">=</span>params <span class="co"># Save the trajectory</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> param_traj</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co"># intitalize the optimizer</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>init_point <span class="op">=</span> [<span class="op">-</span><span class="fl">4.0</span>, <span class="op">-</span><span class="fl">2.0</span>]</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="op">=</span> <span class="dv">100000</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co"># define the eta for part c</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>eta_c <span class="op">=</span> <span class="fl">1e-3</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co"># run the optimizer for the momentum and ADAM with higher learning rate</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>mom_traj_c <span class="op">=</span> gd_with_mom(prob_func_grad, init_point, n_epochs<span class="op">=</span>n_epochs, eta<span class="op">=</span>eta_c)</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>adam_traj_c <span class="op">=</span> adams(prob_func_grad, init_point, n_epochs<span class="op">=</span>n_epochs, eta<span class="op">=</span>eta_c)</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the log 10 error</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>true_min <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">1</span>])</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>mom_error_c <span class="op">=</span> np.log10(np.<span class="bu">sum</span>((mom_traj_c <span class="op">-</span> true_min)<span class="op">**</span><span class="dv">2</span>, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>adam_error_c <span class="op">=</span> np.log10(np.<span class="bu">sum</span>((adam_traj_c <span class="op">-</span> true_min)<span class="op">**</span><span class="dv">2</span>, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">6</span>))</span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the contour with trajectories</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].contour(X, Y, Z, levels<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">1</span>, <span class="fl">3.5</span>, <span class="dv">20</span>), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(mom_traj_c[:, <span class="dv">0</span>], mom_traj_c[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Momentum (η=1e-3)'</span>)</span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(adam_traj_c[:, <span class="dv">0</span>], adam_traj_c[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Adam (η=1e-3)'</span>)</span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(<span class="dv">1</span>, <span class="dv">1</span>, <span class="st">'r*'</span>, markersize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].set_title(<span class="st">"Trajectories at η = 1e-3"</span>)</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].legend()</span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the log error</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].plot(mom_error_c, label<span class="op">=</span><span class="st">'Momentum (η=1e-3)'</span>)</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].plot(adam_error_c, label<span class="op">=</span><span class="st">'Adam (η=1e-3)'</span>)</span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_title(<span class="st">"Log10 Error vs Time Step (η = 1e-3)"</span>)</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_xlabel(<span class="st">"Timestep"</span>)</span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_ylabel(<span class="st">"log10(Error)"</span>)</span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].legend()</span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="co"># define the eta for part d</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>eta_d <span class="op">=</span> <span class="fl">1e-2</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a><span class="co"># Run with even higher learning rate</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>mom_traj_d <span class="op">=</span> gd_with_mom(prob_func_grad, init_point, n_epochs<span class="op">=</span>n_epochs, eta<span class="op">=</span>eta_d)</span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>adam_traj_d <span class="op">=</span> adams(prob_func_grad, init_point, n_epochs<span class="op">=</span>n_epochs, eta<span class="op">=</span>eta_d)</span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate errors</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>mom_error_d <span class="op">=</span> np.log10(np.<span class="bu">sum</span>((mom_traj_d <span class="op">-</span> true_min)<span class="op">**</span><span class="dv">2</span>, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>adam_error_d <span class="op">=</span> np.log10(np.<span class="bu">sum</span>((adam_traj_d <span class="op">-</span> true_min)<span class="op">**</span><span class="dv">2</span>, axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="co"># plot</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>fig, axs <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">6</span>))</span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the contour with trajectories</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].contour(X, Y, Z, levels<span class="op">=</span>np.logspace(<span class="op">-</span><span class="dv">1</span>, <span class="fl">3.5</span>, <span class="dv">20</span>), cmap<span class="op">=</span><span class="st">'viridis'</span>)</span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(mom_traj_d[:, <span class="dv">0</span>], mom_traj_d[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Momentum (η=1e-2)'</span>)</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(adam_traj_d[:, <span class="dv">0</span>], adam_traj_d[:, <span class="dv">1</span>], label<span class="op">=</span><span class="st">'Adam (η=1e-2)'</span>)</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].plot(<span class="dv">1</span>, <span class="dv">1</span>, <span class="st">'r*'</span>, markersize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].set_title(<span class="st">"Trajectories at η = 1e-2"</span>)</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">0</span>].legend()</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the log error</span></span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].plot(mom_error_d, label<span class="op">=</span><span class="st">'Momentum (η=1e-2)'</span>)</span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].plot(adam_error_d, label<span class="op">=</span><span class="st">'Adam (η=1e-2)'</span>)</span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_title(<span class="st">"Log10 Error vs Time Step (η = 1e-2)"</span>)</span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_xlabel(<span class="st">"Timestep"</span>)</span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].set_ylabel(<span class="st">"log10(Error)"</span>)</span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>axs[<span class="dv">1</span>].legend()</span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/h4/zjq554hs0b57vqfcrc5738wh0000gn/T/ipykernel_62856/3856364375.py:12: RuntimeWarning:
+
+overflow encountered in scalar power
+
+/var/folders/h4/zjq554hs0b57vqfcrc5738wh0000gn/T/ipykernel_62856/3856364375.py:13: RuntimeWarning:
+
+overflow encountered in scalar power
+
+/var/folders/h4/zjq554hs0b57vqfcrc5738wh0000gn/T/ipykernel_62856/3856364375.py:12: RuntimeWarning:
+
+invalid value encountered in scalar subtract
+
+/var/folders/h4/zjq554hs0b57vqfcrc5738wh0000gn/T/ipykernel_62856/3856364375.py:13: RuntimeWarning:
+
+invalid value encountered in scalar subtract
+
+/var/folders/h4/zjq554hs0b57vqfcrc5738wh0000gn/T/ipykernel_62856/3856364375.py:62: RuntimeWarning:
+
+overflow encountered in square
+
+/var/folders/h4/zjq554hs0b57vqfcrc5738wh0000gn/T/ipykernel_62856/3856364375.py:92: RuntimeWarning:
+
+overflow encountered in square
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_609_assignment_7_files/figure-html/cell-4-output-2.png" width="1241" height="523" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_609_assignment_7_files/figure-html/cell-4-output-3.png" width="1525" height="564" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
 <section id="problem-2-shallow-nets-and-mnist" class="level2">
 <h2 class="anchored" data-anchor-id="problem-2-shallow-nets-and-mnist">Problem 2: Shallow Nets and MNIST</h2>
 <p>For this exercise, we will work on one of the standard model problems in Machine Learning, classifying handwritten digits. We will use an adaptation of the neural network code from your reading assignment to pytorch, which is one of the leading frameworks for training neural networks. pytorch is fairly flexible, you can use it with the CPU on your personal computer, with GPUs, and even on computing clusters. If you have trouble getting pytorch to work on your own computer I recommend trying in on google colab, or alternatively you are welcome to develop your own implementation. This and the next assignment have helper code in the provided ipython notebook Lab 7 Helper Noteook</p>
 <p>First, you should acquire the MNIST dataset. This can be downloaded automatically using pytorch via the following code chunk:</p>
-<div id="cdd1964f" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Here is some code that automatically downlaods the MNIST data. Technically it will also read the</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># data in if you have already downloaded and the path points to the folder where you have the files</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># There will be 4 binary files which together contain the testing and training examples and the labels</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># for the testing and training examples. </span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Load MNIST</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># transform defines a function which takes an image file, converts the analog bits into floating point </span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># numbers (it's a literal image file in the data), and then flattens the file. Each image is 28x28</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># so at the end we get a 784x1 vector</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([transforms.ToTensor(), transforms.Lambda(<span class="kw">lambda</span> x: x.view(<span class="op">-</span><span class="dv">1</span>))])</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># The first line downloads the entire MNIST dataset to the data directory (or whereever you want it)</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># If the data is already there, this won't download it. THis downloads both the training and testing data.</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># the transform keyword applies the transform defined above, the train dataset has 60,000 examples, and</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># the test dataset has 10,000 examples. The train and test data is loaded in the variables.</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'data/'</span>, train<span class="op">=</span><span class="va">True</span>, download<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>test_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'data/'</span>, train<span class="op">=</span><span class="va">False</span>, transform<span class="op">=</span>transform)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="41de13e7" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # Here is some code that automatically downlaods the MNIST data. Technically it will also read the</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># # data in if you have already downloaded and the path points to the folder where you have the files</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># # There will be 4 binary files which together contain the testing and training examples and the labels</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># # for the testing and training examples. </span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># from torchvision import datasets, transforms</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># # Load MNIST</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># # transform defines a function which takes an image file, converts the analog bits into floating point numbers (it's a literal image file in the data), and then flattens the file. Each image is 28x28, so at the end we get a 784x1 vector</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))])</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># # The first line downloads the entire MNIST dataset to the data directory (or whereever you want it)</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co"># # If the data is already there, this won't download it. THis downloads both the training and testing data.</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co"># # the transform keyword applies the transform defined above, the train dataset has 60,000 examples, and</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># # the test dataset has 10,000 examples. The train and test data is loaded in the variables.</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># train_dataset = datasets.MNIST('data/', train=True, download=True, transform=transform)</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co"># test_dataset = datasets.MNIST('data/', train=False, transform=transform)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We are going to train a simple neural network to classify the MNIST images. The neural network has an input layer of 784 neurons (one for each pixel), a 30 neuron hidden layer, and a 10 neuron output layer, which provided a weight that corresponds to the predictions of the neural network for each class. Initially we will use sigmoidal neurons to process the inputs. Throughout the rest of the assignment you will use and improve the code in this file to study the performance of different combinations of network structure, optimization algorithm choice, hyperparameters, and activation functions.</p>
 <p>The initial configuration of the neural network uses stochastic gradient descent without momentum. The following code sets several key hyperparameters and trains the neural network:</p>
-<div id="8242a810" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># batch_size determines the minibatch size</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>test_loader <span class="op">=</span> DataLoader(test_dataset, batch_size<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize network</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># net = Network([784, 30, 10])</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Train</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"># sol = train(net, train_loader, epochs=30, eta=0.001, test_data=test_loader)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="d6787d4b" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # batch_size determines the minibatch size</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># import torch</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># import torch.nn as nn</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># import torch.nn.functional as F</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># import torch.optim as optim</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># from torch.utils.data import DataLoader</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># train_loader = DataLoader(train_dataset, batch_size=10, shuffle=True)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># test_loader = DataLoader(test_dataset, batch_size=10, shuffle=False)</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># # Initialize network</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># # net = Network([784, 30, 10])</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co"># # Train</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># # sol = train(net, train_loader, epochs=30, eta=0.001, test_data=test_loader)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Additional parameters can be changed within the code of the function itself (and you can organize your code in any way you see fit), in the train function:</p>
-<div id="f26d61cb" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># optimizer = optim.SGD(network.parameters(),momentum=0.8,nesterov=True, lr=eta,weight_decay=1e-5)</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This uncomment this (and comment the above line) if you want to use ADAM. The betas are the memory</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># parameters, you can experiment with these hyperparaeters if you like:</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">#optimizer = optim.Adam(network.parameters(),betas = (0.9,0.999), lr=eta,weight_decay=1e-5)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Here is code for using learning rate scheduling. You might find this helpful</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">#step_size = 2</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">#gamma = 0.7</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="8a0857dd" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="co"># optimizer = optim.SGD(network.parameters(),momentum=0.8,nesterov=True, lr=eta,weight_decay=1e-5)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This uncomment this (and comment the above line) if you want to use ADAM. The betas are the memory</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># parameters, you can experiment with these hyperparaeters if you like:</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">#optimizer = optim.Adam(network.parameters(),betas = (0.9,0.999), lr=eta,weight_decay=1e-5)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Here is code for using learning rate scheduling. You might find this helpful</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">#step_size = 2</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">#gamma = 0.7</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>and also in the class function:</p>
-<div id="ce2ac61e" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Network(nn.Module):</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, sizes):</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(Network, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.sizes <span class="op">=</span> sizes</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_layers <span class="op">=</span> <span class="bu">len</span>(sizes)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> nn.ModuleList()</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.num_layers <span class="op">-</span> <span class="dv">1</span>):</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            layer <span class="op">=</span> nn.Linear(sizes[i], sizes[i<span class="op">+</span><span class="dv">1</span>])</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            nn.init.xavier_normal_(layer.weight)   <span class="co"># Good initialization for shallow/sigmoid nets</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            <span class="co">#nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu') initialization for relus</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">#nn.init.kaiming_uniform_(layer.weight, mode='fan_out', nonlinearity='relu') initialization for relus and deep nets</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            nn.init.zeros_(layer.bias)               <span class="co"># initialize the bias to 0</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.layers.append(layer)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Forward is the method that calculates the value of the neural network. Basically we recursively apply the activations in each</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># layer</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> layer <span class="kw">in</span> <span class="va">self</span>.layers[:<span class="op">-</span><span class="dv">1</span>]:</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> F.sigmoid(layer(x))   <span class="co"># sigmoid layers</span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            <span class="co"># x = F.relu(layer(x)) # You will try the relu layer in the last problem</span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.layers[<span class="op">-</span><span class="dv">1</span>](x) </span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="856ebd32" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># class Network(nn.Module):</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#     def __init__(self, sizes):</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#         super(Network, self).__init__()</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#         self.sizes = sizes</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#         self.num_layers = len(sizes)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#         self.layers = nn.ModuleList()</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#         for i in range(self.num_layers - 1):</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#             layer = nn.Linear(sizes[i], sizes[i+1])</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#             nn.init.xavier_normal_(layer.weight)   # Good initialization for shallow/sigmoid nets</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#             #nn.init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu') initialization for relus</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#             #nn.init.kaiming_uniform_(layer.weight, mode='fan_out', nonlinearity='relu') initialization for relus and deep nets</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#             nn.init.zeros_(layer.bias)               # initialize the bias to 0</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#             self.layers.append(layer)</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">#     # Forward is the method that calculates the value of the neural network. Basically we recursively apply the activations in each</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">#     # layer</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#     def forward(self, x):</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co">#         for layer in self.layers[:-1]:</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co">#             x = F.sigmoid(layer(x))   # sigmoid layers</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="co">#             # x = F.relu(layer(x)) # You will try the relu layer in the last problem</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="co">#         x = self.layers[-1](x) </span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">#         return x</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The default set of hyperparameters lead to a neural network that successfully trains, and has an ultimate out of sample accuracy of just below 0.95 after 30 epochs of training on my computer.</p>
 <p>Validate this result by executing the train command with the parameters described above. Next, the learning rate is one of the most important hyperparameters in machine learning. Train the same structure of neural network with a range of different learning rates both higher and lower. Make sure you find a learning rate high enough so that the neural network performance is poor. What was the learning rate that led to the best accuracy at the end of 30 epochs? Plot the test accuracy as a function of epochs (it is one of the outputs of the train function) for all of the learning rates that you tested.</p>
 <p>How does the ADAM optimizer handle this problem? Modify the neural network code so that the optimizer is ADAM optimizer (you will see commented code in the train function). Then train a neural network using ADAM again with a range of different learning rates (including the same starting point as in part(a)). Compare the behavior of the learning curves, the final accuracy, and the values of the learning rates that were most successful with part (a).</p>
 <p>How good can you make your 3-layer network? You don’t need to do an exhaustive search of all possible options (which would take forever) but experiment with the optimization algorithm, the learning rate and the other hyper-parameters. For example, you could include more or fewer neurons in the hidden layer, change the values of the betas in ADAM or the momentum in SGD, alter the batch size in the data loader, change the learning rate, increase or decrease the weight decay (which is L2 regularization), or change the number of training epochs.</p>
-<p>Some tips: - For this problem I don’t think it is likely to have an accuracy above 0.99 without expanding the data - Larger batch sizes have less “noise” so might need more regularization. They also sometimes require larger learning rates - The learning rate scheduler will decrease the learning rate by a factor of every steps number of epochs</p>
+<p>Some tips: - For this problem I don’t think it is likely to have an accuracy above 0.99 without expanding the data - Larger batch sizes have less “noise” so might need more regularization. They also sometimes require larger learning rates - The learning rate scheduler will decrease the learning rate by a factor of $gamma$ every steps number of epochs</p>
+<section id="problem-2-solution" class="level3">
+<h3 class="anchored" data-anchor-id="problem-2-solution">Problem 2 Solution</h3>
+<div id="f134dd80" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Load and Prepare Data</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    transforms.ToTensor(),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    transforms.Lambda(<span class="kw">lambda</span> x: x.view(<span class="op">-</span><span class="dv">1</span>))  <span class="co"># Flatten 28x28 image to 784-dim vector</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'data/'</span>, train<span class="op">=</span><span class="va">True</span>, download<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>test_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'data/'</span>, train<span class="op">=</span><span class="va">False</span>, transform<span class="op">=</span>transform)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>test_loader <span class="op">=</span> DataLoader(test_dataset, batch_size<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Define the Network</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Network(nn.Module):</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, sizes, activation<span class="op">=</span><span class="st">'sigmoid'</span>):</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(Network, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.activation <span class="op">=</span> activation</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> nn.ModuleList()</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(sizes) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>            layer <span class="op">=</span> nn.Linear(sizes[i], sizes[i<span class="op">+</span><span class="dv">1</span>])</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>            nn.init.xavier_normal_(layer.weight) <span class="cf">if</span> activation <span class="op">==</span> <span class="st">'sigmoid'</span> <span class="cf">else</span> nn.init.kaiming_uniform_(layer.weight, nonlinearity<span class="op">=</span><span class="st">'relu'</span>)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>            nn.init.zeros_(layer.bias)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.layers.append(layer)</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> layer <span class="kw">in</span> <span class="va">self</span>.layers[:<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> F.sigmoid(layer(x)) <span class="cf">if</span> <span class="va">self</span>.activation <span class="op">==</span> <span class="st">'sigmoid'</span> <span class="cf">else</span> F.relu(layer(x))</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.layers[<span class="op">-</span><span class="dv">1</span>](x)</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Training Function</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(network, train_loader, test_loader, epochs<span class="op">=</span><span class="dv">30</span>, eta<span class="op">=</span><span class="fl">0.001</span>, optimizer_type<span class="op">=</span><span class="st">'SGD'</span>):</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    criterion <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> optimizer_type <span class="op">==</span> <span class="st">'SGD'</span>:</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>        optimizer <span class="op">=</span> optim.SGD(network.parameters(), lr<span class="op">=</span>eta, momentum<span class="op">=</span><span class="fl">0.8</span>, nesterov<span class="op">=</span><span class="va">True</span>, weight_decay<span class="op">=</span><span class="fl">1e-5</span>)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> optimizer_type <span class="op">==</span> <span class="st">'Adam'</span>:</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>        optimizer <span class="op">=</span> optim.Adam(network.parameters(), betas<span class="op">=</span>(<span class="fl">0.9</span>, <span class="fl">0.999</span>), lr<span class="op">=</span>eta, weight_decay<span class="op">=</span><span class="fl">1e-5</span>)</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Unsupported optimizer type."</span>)</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    test_acc_list <span class="op">=</span> []</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        network.train()</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> images, labels <span class="kw">in</span> train_loader:</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> network(images)</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> criterion(outputs, labels)</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Evaluate on test set</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        network.<span class="bu">eval</span>()</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>        correct <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>        total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> images, labels <span class="kw">in</span> test_loader:</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>                outputs <span class="op">=</span> network(images)</span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>                _, predicted <span class="op">=</span> torch.<span class="bu">max</span>(outputs.data, <span class="dv">1</span>)</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>                total <span class="op">+=</span> labels.size(<span class="dv">0</span>)</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>                correct <span class="op">+=</span> (predicted <span class="op">==</span> labels).<span class="bu">sum</span>().item()</span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> correct <span class="op">/</span> total</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>        test_acc_list.append(acc)</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>epochs<span class="sc">}</span><span class="ss">, Accuracy: </span><span class="sc">{</span>acc<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> test_acc_list</span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Run Experiments</span></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>learning_rates <span class="op">=</span> [<span class="fl">0.0001</span>, <span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="fl">0.05</span>]</span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>optimizers <span class="op">=</span> [<span class="st">'SGD'</span>, <span class="st">'Adam'</span>]</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> {}</span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> opt <span class="kw">in</span> optimizers:</span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> lr <span class="kw">in</span> learning_rates:</span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Training with </span><span class="sc">{</span>opt<span class="sc">}</span><span class="ss">, Learning Rate = </span><span class="sc">{</span>lr<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>        model <span class="op">=</span> Network([<span class="dv">784</span>, <span class="dv">30</span>, <span class="dv">10</span>], activation<span class="op">=</span><span class="st">'sigmoid'</span>)</span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>        acc <span class="op">=</span> train(model, train_loader, test_loader, epochs<span class="op">=</span><span class="dv">30</span>, eta<span class="op">=</span>lr, optimizer_type<span class="op">=</span>opt)</span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>        results[(opt, lr)] <span class="op">=</span> acc</span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Plot Results</span></span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------</span></span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">7</span>))</span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, acc <span class="kw">in</span> results.items():</span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a>    label <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>key[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> (lr=</span><span class="sc">{</span>key[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">)"</span></span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a>    plt.plot(acc, label<span class="op">=</span>label)</span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Epoch"</span>)</span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Test Accuracy"</span>)</span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Test Accuracy vs Epochs for Different Optimizers and Learning Rates"</span>)</span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Training with SGD, Learning Rate = 0.0001
+Epoch 1/30, Accuracy: 0.5902
+Epoch 2/30, Accuracy: 0.6812
+Epoch 3/30, Accuracy: 0.7305
+Epoch 4/30, Accuracy: 0.7632
+Epoch 5/30, Accuracy: 0.7786
+Epoch 6/30, Accuracy: 0.7969
+Epoch 7/30, Accuracy: 0.8123
+Epoch 8/30, Accuracy: 0.8223
+Epoch 9/30, Accuracy: 0.8301
+Epoch 10/30, Accuracy: 0.8371
+Epoch 11/30, Accuracy: 0.8442
+Epoch 12/30, Accuracy: 0.8509
+Epoch 13/30, Accuracy: 0.8559
+Epoch 14/30, Accuracy: 0.8608
+Epoch 15/30, Accuracy: 0.8659
+Epoch 16/30, Accuracy: 0.8690
+Epoch 17/30, Accuracy: 0.8719
+Epoch 18/30, Accuracy: 0.8749
+Epoch 19/30, Accuracy: 0.8766
+Epoch 20/30, Accuracy: 0.8780
+Epoch 21/30, Accuracy: 0.8802
+Epoch 22/30, Accuracy: 0.8817
+Epoch 23/30, Accuracy: 0.8850
+Epoch 24/30, Accuracy: 0.8869
+Epoch 25/30, Accuracy: 0.8881
+Epoch 26/30, Accuracy: 0.8901
+Epoch 27/30, Accuracy: 0.8912
+Epoch 28/30, Accuracy: 0.8917
+Epoch 29/30, Accuracy: 0.8933
+Epoch 30/30, Accuracy: 0.8935
+
+Training with SGD, Learning Rate = 0.001
+Epoch 1/30, Accuracy: 0.8449
+Epoch 2/30, Accuracy: 0.8835
+Epoch 3/30, Accuracy: 0.8979
+Epoch 4/30, Accuracy: 0.9030
+Epoch 5/30, Accuracy: 0.9069
+Epoch 6/30, Accuracy: 0.9104
+Epoch 7/30, Accuracy: 0.9149
+Epoch 8/30, Accuracy: 0.9174
+Epoch 9/30, Accuracy: 0.9201
+Epoch 10/30, Accuracy: 0.9232
+Epoch 11/30, Accuracy: 0.9252
+Epoch 12/30, Accuracy: 0.9274
+Epoch 13/30, Accuracy: 0.9283
+Epoch 14/30, Accuracy: 0.9292
+Epoch 15/30, Accuracy: 0.9306
+Epoch 16/30, Accuracy: 0.9315
+Epoch 17/30, Accuracy: 0.9322
+Epoch 18/30, Accuracy: 0.9332
+Epoch 19/30, Accuracy: 0.9341
+Epoch 20/30, Accuracy: 0.9344
+Epoch 21/30, Accuracy: 0.9358
+Epoch 22/30, Accuracy: 0.9362
+Epoch 23/30, Accuracy: 0.9380
+Epoch 24/30, Accuracy: 0.9380
+Epoch 25/30, Accuracy: 0.9388
+Epoch 26/30, Accuracy: 0.9399
+Epoch 27/30, Accuracy: 0.9401
+Epoch 28/30, Accuracy: 0.9407
+Epoch 29/30, Accuracy: 0.9413
+Epoch 30/30, Accuracy: 0.9421
+
+Training with SGD, Learning Rate = 0.01
+Epoch 1/30, Accuracy: 0.9211
+Epoch 2/30, Accuracy: 0.9341
+Epoch 3/30, Accuracy: 0.9378
+Epoch 4/30, Accuracy: 0.9454
+Epoch 5/30, Accuracy: 0.9471
+Epoch 6/30, Accuracy: 0.9507
+Epoch 7/30, Accuracy: 0.9528
+Epoch 8/30, Accuracy: 0.9551
+Epoch 9/30, Accuracy: 0.9546
+Epoch 10/30, Accuracy: 0.9571
+Epoch 11/30, Accuracy: 0.9576
+Epoch 12/30, Accuracy: 0.9594
+Epoch 13/30, Accuracy: 0.9609
+Epoch 14/30, Accuracy: 0.9601
+Epoch 15/30, Accuracy: 0.9616
+Epoch 16/30, Accuracy: 0.9612
+Epoch 17/30, Accuracy: 0.9621
+Epoch 18/30, Accuracy: 0.9621
+Epoch 19/30, Accuracy: 0.9630
+Epoch 20/30, Accuracy: 0.9634
+Epoch 21/30, Accuracy: 0.9641
+Epoch 22/30, Accuracy: 0.9649
+Epoch 23/30, Accuracy: 0.9633
+Epoch 24/30, Accuracy: 0.9626
+Epoch 25/30, Accuracy: 0.9648
+Epoch 26/30, Accuracy: 0.9647
+Epoch 27/30, Accuracy: 0.9659
+Epoch 28/30, Accuracy: 0.9659
+Epoch 29/30, Accuracy: 0.9646
+Epoch 30/30, Accuracy: 0.9661
+
+Training with SGD, Learning Rate = 0.05
+Epoch 1/30, Accuracy: 0.9441
+Epoch 2/30, Accuracy: 0.9494
+Epoch 3/30, Accuracy: 0.9566
+Epoch 4/30, Accuracy: 0.9596
+Epoch 5/30, Accuracy: 0.9600
+Epoch 6/30, Accuracy: 0.9594
+Epoch 7/30, Accuracy: 0.9639
+Epoch 8/30, Accuracy: 0.9630
+Epoch 9/30, Accuracy: 0.9649
+Epoch 10/30, Accuracy: 0.9624
+Epoch 11/30, Accuracy: 0.9638
+Epoch 12/30, Accuracy: 0.9616
+Epoch 13/30, Accuracy: 0.9645
+Epoch 14/30, Accuracy: 0.9642
+Epoch 15/30, Accuracy: 0.9636
+Epoch 16/30, Accuracy: 0.9637
+Epoch 17/30, Accuracy: 0.9640
+Epoch 18/30, Accuracy: 0.9639
+Epoch 19/30, Accuracy: 0.9642
+Epoch 20/30, Accuracy: 0.9641
+Epoch 21/30, Accuracy: 0.9647
+Epoch 22/30, Accuracy: 0.9656
+Epoch 23/30, Accuracy: 0.9638
+Epoch 24/30, Accuracy: 0.9632
+Epoch 25/30, Accuracy: 0.9649
+Epoch 26/30, Accuracy: 0.9618
+Epoch 27/30, Accuracy: 0.9645
+Epoch 28/30, Accuracy: 0.9660
+Epoch 29/30, Accuracy: 0.9630
+Epoch 30/30, Accuracy: 0.9647
+
+Training with Adam, Learning Rate = 0.0001
+Epoch 1/30, Accuracy: 0.8739
+Epoch 2/30, Accuracy: 0.9037
+Epoch 3/30, Accuracy: 0.9131
+Epoch 4/30, Accuracy: 0.9180
+Epoch 5/30, Accuracy: 0.9226
+Epoch 6/30, Accuracy: 0.9261
+Epoch 7/30, Accuracy: 0.9274
+Epoch 8/30, Accuracy: 0.9314
+Epoch 9/30, Accuracy: 0.9332
+Epoch 10/30, Accuracy: 0.9349
+Epoch 11/30, Accuracy: 0.9361
+Epoch 12/30, Accuracy: 0.9394
+Epoch 13/30, Accuracy: 0.9404
+Epoch 14/30, Accuracy: 0.9414
+Epoch 15/30, Accuracy: 0.9416
+Epoch 16/30, Accuracy: 0.9430
+Epoch 17/30, Accuracy: 0.9441
+Epoch 18/30, Accuracy: 0.9450
+Epoch 19/30, Accuracy: 0.9461
+Epoch 20/30, Accuracy: 0.9468
+Epoch 21/30, Accuracy: 0.9476
+Epoch 22/30, Accuracy: 0.9485
+Epoch 23/30, Accuracy: 0.9496
+Epoch 24/30, Accuracy: 0.9501
+Epoch 25/30, Accuracy: 0.9508
+Epoch 26/30, Accuracy: 0.9514
+Epoch 27/30, Accuracy: 0.9523
+Epoch 28/30, Accuracy: 0.9515
+Epoch 29/30, Accuracy: 0.9526
+Epoch 30/30, Accuracy: 0.9529
+
+Training with Adam, Learning Rate = 0.001
+Epoch 1/30, Accuracy: 0.9333
+Epoch 2/30, Accuracy: 0.9458
+Epoch 3/30, Accuracy: 0.9550
+Epoch 4/30, Accuracy: 0.9584
+Epoch 5/30, Accuracy: 0.9602
+Epoch 6/30, Accuracy: 0.9626
+Epoch 7/30, Accuracy: 0.9624
+Epoch 8/30, Accuracy: 0.9649
+Epoch 9/30, Accuracy: 0.9654
+Epoch 10/30, Accuracy: 0.9656
+Epoch 11/30, Accuracy: 0.9659
+Epoch 12/30, Accuracy: 0.9628
+Epoch 13/30, Accuracy: 0.9672
+Epoch 14/30, Accuracy: 0.9657
+Epoch 15/30, Accuracy: 0.9664
+Epoch 16/30, Accuracy: 0.9631
+Epoch 17/30, Accuracy: 0.9648
+Epoch 18/30, Accuracy: 0.9650
+Epoch 19/30, Accuracy: 0.9665
+Epoch 20/30, Accuracy: 0.9661
+Epoch 21/30, Accuracy: 0.9656
+Epoch 22/30, Accuracy: 0.9668
+Epoch 23/30, Accuracy: 0.9666
+Epoch 24/30, Accuracy: 0.9657
+Epoch 25/30, Accuracy: 0.9645
+Epoch 26/30, Accuracy: 0.9663
+Epoch 27/30, Accuracy: 0.9659
+Epoch 28/30, Accuracy: 0.9665
+Epoch 29/30, Accuracy: 0.9675
+Epoch 30/30, Accuracy: 0.9637
+
+Training with Adam, Learning Rate = 0.01
+Epoch 1/30, Accuracy: 0.9321
+Epoch 2/30, Accuracy: 0.9331
+Epoch 3/30, Accuracy: 0.9439
+Epoch 4/30, Accuracy: 0.9385
+Epoch 5/30, Accuracy: 0.9347
+Epoch 6/30, Accuracy: 0.9431
+Epoch 7/30, Accuracy: 0.9442
+Epoch 8/30, Accuracy: 0.9483
+Epoch 9/30, Accuracy: 0.9447
+Epoch 10/30, Accuracy: 0.9501
+Epoch 11/30, Accuracy: 0.9440
+Epoch 12/30, Accuracy: 0.9496
+Epoch 13/30, Accuracy: 0.9368
+Epoch 14/30, Accuracy: 0.9452
+Epoch 15/30, Accuracy: 0.9503
+Epoch 16/30, Accuracy: 0.9427
+Epoch 17/30, Accuracy: 0.9457
+Epoch 18/30, Accuracy: 0.9528
+Epoch 19/30, Accuracy: 0.9514
+Epoch 20/30, Accuracy: 0.9457
+Epoch 21/30, Accuracy: 0.9484
+Epoch 22/30, Accuracy: 0.9462
+Epoch 23/30, Accuracy: 0.9545
+Epoch 24/30, Accuracy: 0.9510
+Epoch 25/30, Accuracy: 0.9524
+Epoch 26/30, Accuracy: 0.9433
+Epoch 27/30, Accuracy: 0.9464
+Epoch 28/30, Accuracy: 0.9561
+Epoch 29/30, Accuracy: 0.9563
+Epoch 30/30, Accuracy: 0.9492
+
+Training with Adam, Learning Rate = 0.05
+Epoch 1/30, Accuracy: 0.8563
+Epoch 2/30, Accuracy: 0.8408
+Epoch 3/30, Accuracy: 0.8608
+Epoch 4/30, Accuracy: 0.8759
+Epoch 5/30, Accuracy: 0.8166
+Epoch 6/30, Accuracy: 0.8345
+Epoch 7/30, Accuracy: 0.8309
+Epoch 8/30, Accuracy: 0.8847
+Epoch 9/30, Accuracy: 0.8601
+Epoch 10/30, Accuracy: 0.8430
+Epoch 11/30, Accuracy: 0.8766
+Epoch 12/30, Accuracy: 0.8436
+Epoch 13/30, Accuracy: 0.8503
+Epoch 14/30, Accuracy: 0.8555
+Epoch 15/30, Accuracy: 0.8688
+Epoch 16/30, Accuracy: 0.8918
+Epoch 17/30, Accuracy: 0.8689
+Epoch 18/30, Accuracy: 0.8333
+Epoch 19/30, Accuracy: 0.8665
+Epoch 20/30, Accuracy: 0.8508
+Epoch 21/30, Accuracy: 0.8714
+Epoch 22/30, Accuracy: 0.8709
+Epoch 23/30, Accuracy: 0.8551
+Epoch 24/30, Accuracy: 0.8427
+Epoch 25/30, Accuracy: 0.8355
+Epoch 26/30, Accuracy: 0.8740
+Epoch 27/30, Accuracy: 0.8579
+Epoch 28/30, Accuracy: 0.8658
+Epoch 29/30, Accuracy: 0.8824
+Epoch 30/30, Accuracy: 0.8555</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_609_assignment_7_files/figure-html/cell-9-output-2.png" width="969" height="597" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="problem-3-deep-nets-overcoming-gradients" class="level2">
 <h2 class="anchored" data-anchor-id="problem-3-deep-nets-overcoming-gradients">Problem 3: Deep Nets: Overcoming Gradients</h2>
@@ -295,6 +939,146 @@ window.Quarto = {
 <p>If your computer cannot train this network, you can try this problem with a shallower network, or my recommendation is to use only a single epoch of training which should still demonstrate the vanishing gradient problem.</p>
 <p>There are several techniques to deal with vanishing (or exploding) gradients. These include using neurons with different activation functions or using different normalization schemes. The forward method in the Network class defines the activation functions. Change the activation function from sigmoid to relu and change the initialization from Xavier.normal_ to kaiming.uniform_ (which is more optimal for deep ReLU neurons) and train the deep neural network. How does the gradient ratio change? How does the test accuracy compare to the shallow net accuracy you achieved in problem 2?</p>
 <p>Deep neural networks are a superior architecture of image classification problems than shallow networks, however typically the dense structure that we have implemented here is not used. Instead the neural networks usually have several convolutionary layers at the beginning. With some effort and experimentation, it should still be possible to achieve a very high accuracy with a dense neural network. Experiment with the network architecture and the hyperparameters and see how good you can make your deep/dense network. You can try a combination of increasing the number of neurons in the hidden layers or incrasing the depth of the network. A structure that often works is one which decreases the number of neurons per hidden layer steadily from the input layer to the final layer (i.e.&nbsp;starting at 784 and ending at 10). Can you improve upon the best shallow network that you constructed for problem 3?</p>
+<div id="194a39d7" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> DataLoader</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision <span class="im">import</span> datasets, transforms</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Load MNIST</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>transform <span class="op">=</span> transforms.Compose([transforms.ToTensor(), transforms.Lambda(<span class="kw">lambda</span> x: x.view(<span class="op">-</span><span class="dv">1</span>))])</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'data/'</span>, train<span class="op">=</span><span class="va">True</span>, download<span class="op">=</span><span class="va">True</span>, transform<span class="op">=</span>transform)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>test_dataset <span class="op">=</span> datasets.MNIST(<span class="st">'data/'</span>, train<span class="op">=</span><span class="va">False</span>, transform<span class="op">=</span>transform)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> DataLoader(train_dataset, batch_size<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>test_loader <span class="op">=</span> DataLoader(test_dataset, batch_size<span class="op">=</span><span class="dv">10</span>, shuffle<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the network</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Network(nn.Module):</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, sizes, use_relu<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(Network, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.use_relu <span class="op">=</span> use_relu</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> nn.ModuleList()</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(sizes)<span class="op">-</span><span class="dv">1</span>):</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>            layer <span class="op">=</span> nn.Linear(sizes[i], sizes[i<span class="op">+</span><span class="dv">1</span>])</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> use_relu:</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>                nn.init.kaiming_uniform_(layer.weight, nonlinearity<span class="op">=</span><span class="st">'relu'</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>                nn.init.xavier_normal_(layer.weight)</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>            nn.init.zeros_(layer.bias)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.layers.append(layer)</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> layer <span class="kw">in</span> <span class="va">self</span>.layers[:<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> F.relu(layer(x)) <span class="cf">if</span> <span class="va">self</span>.use_relu <span class="cf">else</span> torch.sigmoid(layer(x))</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.layers[<span class="op">-</span><span class="dv">1</span>](x)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Train function with gradient monitoring</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(network, train_loader, test_loader, epochs<span class="op">=</span><span class="dv">1</span>, eta<span class="op">=</span><span class="fl">0.001</span>):</span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> optim.SGD(network.parameters(), lr<span class="op">=</span>eta)</span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    criterion <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>    grad_ratios <span class="op">=</span> []</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    test_acc <span class="op">=</span> []</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>        network.train()</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>        input_grads, output_grads <span class="op">=</span> <span class="fl">0.0</span>, <span class="fl">0.0</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>        n_batches <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> images, labels <span class="kw">in</span> train_loader:</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> network(images)</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> criterion(outputs, labels)</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Gradient norm monitoring</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>            input_grad_norm <span class="op">=</span> network.layers[<span class="dv">0</span>].weight.grad.norm().item()</span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>            output_grad_norm <span class="op">=</span> network.layers[<span class="op">-</span><span class="dv">1</span>].weight.grad.norm().item()</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>            input_grads <span class="op">+=</span> input_grad_norm</span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>            output_grads <span class="op">+=</span> output_grad_norm</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>            n_batches <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>        grad_ratio <span class="op">=</span> (input_grads <span class="op">/</span> n_batches) <span class="op">/</span> (output_grads <span class="op">/</span> n_batches <span class="op">+</span> <span class="fl">1e-8</span>)</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>        grad_ratios.append(grad_ratio)</span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Evaluate on test data</span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>        network.<span class="bu">eval</span>()</span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>        correct, total <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> images, labels <span class="kw">in</span> test_loader:</span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a>                outputs <span class="op">=</span> network(images)</span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>                predicted <span class="op">=</span> torch.argmax(outputs, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>                total <span class="op">+=</span> labels.size(<span class="dv">0</span>)</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>                correct <span class="op">+=</span> (predicted <span class="op">==</span> labels).<span class="bu">sum</span>().item()</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>        accuracy <span class="op">=</span> correct <span class="op">/</span> total</span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>        test_acc.append(accuracy)</span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="op">+</span><span class="dv">1</span><span class="sc">}</span><span class="ss">: Gradient Ratio = </span><span class="sc">{</span>grad_ratio<span class="sc">:.6f}</span><span class="ss">, Test Accuracy = </span><span class="sc">{</span>accuracy<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> grad_ratios, test_acc</span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a><span class="co"># Create deep network</span></span>
+<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a>net <span class="op">=</span> Network([<span class="dv">784</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">10</span>], use_relu<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a>ratios_sigmoid, acc_sigmoid <span class="op">=</span> train(net, train_loader, test_loader, epochs<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a>plt.plot(ratios_sigmoid)</span>
+<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Gradient Ratio (Input/Output) - Sigmoid"</span>)</span>
+<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a>plt.plot(acc_sigmoid)</span>
+<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Test Accuracy - Sigmoid"</span>)</span>
+<span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a><span class="co"># Now with ReLU + Kaiming</span></span>
+<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a>net_relu <span class="op">=</span> Network([<span class="dv">784</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">30</span>,<span class="dv">10</span>], use_relu<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a>ratios_relu, acc_relu <span class="op">=</span> train(net_relu, train_loader, test_loader, epochs<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot ReLU results</span></span>
+<span id="cb11-103"><a href="#cb11-103" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb11-104"><a href="#cb11-104" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb11-105"><a href="#cb11-105" aria-hidden="true" tabindex="-1"></a>plt.plot(ratios_relu)</span>
+<span id="cb11-106"><a href="#cb11-106" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Gradient Ratio (Input/Output) - ReLU"</span>)</span>
+<span id="cb11-107"><a href="#cb11-107" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb11-108"><a href="#cb11-108" aria-hidden="true" tabindex="-1"></a>plt.plot(acc_relu)</span>
+<span id="cb11-109"><a href="#cb11-109" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Test Accuracy - ReLU"</span>)</span>
+<span id="cb11-110"><a href="#cb11-110" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch 1: Gradient Ratio = 0.000040, Test Accuracy = 0.1135
+Epoch 2: Gradient Ratio = 0.000040, Test Accuracy = 0.1135
+Epoch 3: Gradient Ratio = 0.000040, Test Accuracy = 0.1135
+Epoch 4: Gradient Ratio = 0.000040, Test Accuracy = 0.1135
+Epoch 5: Gradient Ratio = 0.000040, Test Accuracy = 0.1135</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_609_assignment_7_files/figure-html/cell-10-output-2.png" width="951" height="431" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Epoch 1: Gradient Ratio = 2.722064, Test Accuracy = 0.8159
+Epoch 2: Gradient Ratio = 2.135861, Test Accuracy = 0.8909
+Epoch 3: Gradient Ratio = 2.220501, Test Accuracy = 0.9096
+Epoch 4: Gradient Ratio = 2.290969, Test Accuracy = 0.9291
+Epoch 5: Gradient Ratio = 2.350508, Test Accuracy = 0.9338</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data_609_assignment_7_files/figure-html/cell-10-output-4.png" width="943" height="431" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 
 </main>
