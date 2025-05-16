@@ -9,12 +9,32 @@ author: Eddie Xu
 
 All financial institutions are required to report their financial data in accordance with multiple regulatory frameworks such as Basel III and Dodd Frank Act. Due to the complexities with some of the framework, it can be challenging for some financial companies, particularly smaller regional or community banks, to maximize their returns while ensure that they are to be in regulatory compliance on limited resources and times. Because of that, it can cause potential reporting errors and may lead to financial institutions being penalized with fines of millions dollars and may have a significant impact on the financial market.
 
-For this project, the purpose will be using convex optimization applications for a simple regulatory financial reporting problem. Specifically, the optimal allocation of a bank's capital across different assets (cash, bonds, stocks, etc) will be determined in order to maximize returns while ensuring compliance with regulatory capital requirements. 
+### Abstract
+
+For this project, the goal is to leverage convex optimization applications for a simple regulatory financial reporting problem. Specifically, the optimal allocation of a proposed bank's capital across different assets (cash, bonds, stocks, etc) will be determined in order to maximize returns and minimize the market risks while ensuring compliance with regulatory capital requirements under the Basel III. A proposed bank and its capital will be designed 
 
 ### Data Source
 
+For data sources, this project will utilizes public available data including yfinance and quantstats. The S&P 500 will be used to reflect
 
-### Data Wrangling 
+### Data Wrangling
+
+```{python}
+# load dependencies
+import numpy as np
+import pandas as pd
+import cvxpy as cp
+import matplotlib.pyplot as plt
+import datetime as dt
+import warnings
+warnings.filterwarnings("ignore")
+
+# data libraries
+import yfinance as yf
+import quantstats as qt
+
+
+```
 
 ### Convex Optimization
 
@@ -26,6 +46,147 @@ For this project, the purpose will be using convex optimization applications for
 ### Observation & Insights
 
 
+```{python}
+# load dependencies
+import numpy as np
+import pandas as pd
+import cvxpy as cp
+import matplotlib.pyplot as plt
 
+## Problem 3(a) Solution
+
+# read in data
+stock_url = 'https://media.githubusercontent.com/media/georgehagstrom/DATA609Spring2025/refs/heads/main/website/assignments/labs/labData/stock_returns.csv'
+stock_return_data = pd.read_csv(stock_url)
+stock_return_data['date'] = pd.to_datetime(stock_return_data['date'])
+
+# filter data into training (2020-2022) and testing (2022-2024) periods
+train_period = stock_return_data[(stock_return_data['date'] >= '2020-01-01') & (stock_return_data['date'] <= '2022-12-31')]
+test_period = stock_return_data[(stock_return_data['date'] > '2022-12-31')]
+
+# convert the data with the log return
+train_data = train_period.pivot(index='date', columns='Company', values='log_return')
+test_data = test_period.pivot(index='date', columns='Company', values='log_return')
+
+# calculate the annual mean and covariance matrix
+mu = np.exp(0.5 * train_data.sum()) - 1
+gamma = train_data.cov().values
+
+## Problem 3(b) Solution
+
+# define variables
+r_targets = [1.05, 1.10, 1.20]
+optimal_weights = {}
+portfolio_cum_returns_train = {}
+portfolio_cum_returns_test = {}
+
+for r in r_targets:
+    # define the variable 
+    w = cp.Variable(len(mu))
+
+    # define the objective function: 0.5 * w^T * Gamma * w
+    objective = cp.Minimize(0.5 * cp.quad_form(w, gamma))
+
+    # define the constraints
+    constraints = [cp.sum(w) == 1, w.T @ mu == r, w >= 0]
+
+    # Solve the problem
+    problem = cp.Problem(objective, constraints)
+    problem.solve()
+
+    # store the optimal weight
+    optimal_weights[r] = w.value
+
+    # Calculate portfolio returns for training period
+    portfolio_returns_train = train_data.dot(w.value)
+    portfolio_cum_returns_train[r] = np.cumprod(1 + portfolio_returns_train)
+
+    # Calculate portfolio returns for testing period
+    portfolio_returns_test = test_data.dot(w.value)
+    portfolio_cum_returns_test[r] = np.cumprod(1 + portfolio_returns_test)
+
+# Plot cumulative returns for training and testing periods
+plt.figure(figsize=(12, 6))
+
+for r in r_targets:
+    plt.plot(portfolio_cum_returns_train[r], label=f'Training: r={r}')
+
+plt.title('Cumulative Portfolio Value for Different Target Returns (Training)')
+plt.legend()
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
+
+plt.figure(figsize=(12, 6))
+
+for r in r_targets:
+    plt.plot(portfolio_cum_returns_test[r], label=f'Testing: r={r}')
+
+plt.title('Cumulative Portfolio Value for Different Target Returns (Testing)')
+plt.legend()
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
+
+## Problem 3(c) Solution
+
+# set the target return
+r = 0.20  
+
+# define the lambda range
+lambda_values = np.logspace(-1, 1, 10) 
+
+# define dicts for storing results
+optimal_weights_ridge = {}
+portfolio_cum_returns_train_ridge = {}
+portfolio_cum_returns_test_ridge = {}
+
+
+for lam in lambda_values:
+    # define the variable
+    w = cp.Variable(len(mu))
+
+    # define the objective function: 0.5 * w^T * (Gamma + lambda * I) * w
+    objective = cp.Minimize(0.5 * cp.quad_form(w, cp.psd_wrap(gamma + lam * np.eye(len(mu)))))
+
+    # define the constraints
+    constraints = [cp.sum(w) == 1, w.T @ mu == r, w >= 0]
+
+    # define the optimization problem
+    problem = cp.Problem(objective, constraints)
+
+    # Solve the problem
+    problem.solve()
+
+    # store the optimal weights
+    optimal_weights_ridge[lam] = w.value
+
+    # calculate portfolio returns for training data
+    portfolio_returns_train = train_data.dot(w.value)
+    portfolio_cum_returns_train_ridge[lam] = np.cumprod(1 + portfolio_returns_train)
+
+    # calculate portfolio returns for testing data
+    portfolio_returns_test = test_data.dot(w.value)
+    portfolio_cum_returns_test_ridge[lam] = np.cumprod(1 + portfolio_returns_test)
+
+# plot the lamda training period
+for lam in lambda_values:
+    plt.plot(portfolio_cum_returns_train_ridge[lam], label=f'Training: λ={lam:.2f}')
+
+#plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Training)')
+plt.legend()
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
+
+# plot the lamda testing period
+for lam in lambda_values:
+    plt.plot(portfolio_cum_returns_test_ridge[lam], label=f'Testing: λ={lam:.2f}')
+
+plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Testing)')
+plt.legend()
+plt.xlabel('Days')
+plt.ylabel('Cumulative Portfolio Value')
+plt.show()
 
 

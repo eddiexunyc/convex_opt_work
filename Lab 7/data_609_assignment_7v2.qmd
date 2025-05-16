@@ -532,7 +532,7 @@ class Network(nn.Module):
         self.layers = nn.ModuleList()
         for i in range(len(sizes) - 1):
             layer = nn.Linear(sizes[i], sizes[i+1])
-            nn.init.xavier_normal_(layer.weight) if activation == 'sigmoid' else nn.init.kaiming_uniform_(layer.weight, nonlinearity='relu')
+            nn.init.kaiming_uniform_(layer.weight, mode='fan_out', nonlinearity='relu') # initialization for relus and deep nets
             nn.init.zeros_(layer.bias)
             self.layers.append(layer)
 
@@ -597,9 +597,9 @@ ratios_sigmoid, acc_sigmoid = train(net, train_loader, test_loader, epochs=5)
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
 plt.plot(ratios_sigmoid)
-plt.title("Gradient Ratio (Input/Output) - Sigmoid")
+plt.title("Gradient Ratio (Input/Output)")
 plt.subplot(1, 2, 2)
 plt.plot(acc_sigmoid)
-plt.title("Test Accuracy - Sigmoid")
+plt.title("Test Accuracy")
 plt.show()
 ```
