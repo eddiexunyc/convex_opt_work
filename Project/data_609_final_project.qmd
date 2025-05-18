@@ -11,11 +11,18 @@ All financial institutions are required to report their financial data in accord
 
 ### Abstract
 
-For this project, the goal is to leverage convex optimization applications for a simple regulatory financial reporting problem. Specifically, the optimal allocation of a proposed bank's capital across different assets (cash, bonds, stocks, etc) will be determined in order to maximize returns and minimize the market risks while ensuring compliance with regulatory capital requirements under the Basel III. A proposed bank and its capital will be designed 
+For this project, the goal is to leverage convex optimization applications for a simple regulatory financial reporting problem. Specifically, the optimal allocation of a proposed bank's capital across different assets (cash, bonds, stocks, etc) will be determined in order to maximize return using the Markowitz Portfolio Optimization and minimize the market risks while ensuring compliance with regulatory capital requirements under the Basel III. 
 
 ## Data Exploratory Analysis
 
-For data sources, this project will utilizes public available data based on the 2020-2025 data including yfinance and quantstats. The S&P 500 will be used to reflect the overall stock performance in the US stock market and the I-bonds will be used to reflect the overall treasury bond performance.
+For data sources, this project will utilizes public available data based on the 2020-2025 data including yfinance and quantstats. In terms of data, following tickers will be used that are typically in a bank's portfolio:
+
+- SPY: a ticker that tracks the performance of S&P 500 which encompasses top 500 companies in US
+- TLT: a ticker that tracks the performance of US treasury bonds with remaining maturities greater than 20 years
+- GSG: a ticker that tracks the performance of overall commodities.
+- VNQ: a ticker that tracks the performance of the real estate market
+
+For derivatives, currencies and exchanged-fund index, there are no single specific ticker that track the overall performance. Therfore, they will not be included in the portfolio.
 
 ### Load Dependencies
 
@@ -25,10 +32,8 @@ import numpy as np
 import pandas as pd
 import cvxpy as cp
 import matplotlib.pyplot as plt
-import seaborn as sns
 import datetime as dt
-import warnings
-warnings.filterwarnings("ignore")
+from scipy.stats import norm 
 
 # data financial libraries
 import yfinance as yf
@@ -38,8 +43,8 @@ import quantstats as qs
 ### Data Pulling 
 
 ```{python}
-# pull data for S&P 500 and Treasury from Yahoo Finance
-ticker_list = ['SPY', 'TLT']
+# pull data from Yahoo Finance
+ticker_list = ['SPY', 'TLT', 'GSG', 'VNQ']
 financial_data = yf.download(ticker_list, start = '2020-01-01', end ='2025-01-01', auto_adjust=False, group_by='ticker')
 
 financial_data
@@ -58,167 +63,148 @@ fin_tidy_data = fin_tidy_data.sort_values(by=['Ticker', 'Date'])
 fin_tidy_data['Return'] = fin_tidy_data.groupby('Ticker')['Adj Close'].pct_change()
 fin_tidy_data['Log_Return'] = np.log1p(fin_tidy_data['Return'])
 
-# calculate Value at Risk (VaR) per ticker and merge VaR back into the main data
-temp = fin_tidy_data.set_index('Date')
-var_values = temp.groupby('Ticker')['Return'].apply(qs.stats.var)
-fin_tidy_data = fin_tidy_data.merge(var_values.rename('Value_at_Risk'), on='Ticker')
-
 print(fin_tidy_data.head())
 ```
 
 ### Data Visualization
 
-Based on the historical performance in terms of the adjusted closing price on both tickers, it shows that they were doing fairly well in the last 5 years.
+Based on the historical performance in terms of the adjusted closing price on both tickers, the overall stock market performed very well in last 5 years. In the same period, other financial assets remain stagent. Because of that, it is very hard to compare the prices.
 
 ```{python}
-# pivot the date for line plot
+# pivot the date for adjust closing price line plot
 adj_close = fin_tidy_data.pivot(index='Date', columns = 'Ticker', values = 'Adj Close').reset_index()
 
 # plot the adjusted closing price
-plt.plot(adj_close['Date'], adj_close['SPY'], label = 'SPY',linestyle='-', color='cornflowerblue')
-plt.plot(adj_close['Date'], adj_close['TLT'], label = 'TLT',linestyle='-', color='green')
+plt.plot(adj_close['Date'], adj_close['SPY'], label = 'S&P 500',linestyle='-', color='cornflowerblue')
+plt.plot(adj_close['Date'], adj_close['TLT'], label = 'US Treasury',linestyle='-', color='lightgreen')
+plt.plot(adj_close['Date'], adj_close['GSG'], label = 'Commodities',linestyle='-', color='pink')
+plt.plot(adj_close['Date'], adj_close['VNQ'], label = 'Real Estate',linestyle='-', color='orange')
 
 plt.title("Adjusted Closing Price over Time")
 plt.legend()
 plt.show()
 ```
 
+The simple return shows the price appreciation and is calculated by using the adjusted closing price. Log returns of financial assets take into account of compounding effect by applying the natural logarithm of the ratio of the asset’s final price to its initial price. They are more normally distributed, compared to simple returns. As shown in both returns, the return for real estate is more violate compared to other financial assets.
+
+```{python}
+problem_data = fin_tidy_data.dropna()
+
+# pivot the date for the simple return line plot
+simple_return = fin_tidy_data.pivot(index='Date', columns = 'Ticker', values = 'Return').reset_index()
+
+# plot the adjusted closing price
+plt.plot(simple_return['Date'], simple_return['SPY'], label = 'S&P 500',linestyle='-', color='cornflowerblue')
+plt.plot(simple_return['Date'], simple_return['TLT'], label = 'US Treasury',linestyle='-', color='lightgreen')
+plt.plot(simple_return['Date'], simple_return['GSG'], label = 'Commodities',linestyle='-', color='pink')
+plt.plot(simple_return['Date'], simple_return['VNQ'], label = 'Real Estate',linestyle='-', color='orange')
+
+plt.title("Simple return over Time")
+plt.legend()
+plt.show()
+
+# pivot the date for the log return line plot
+log_return = fin_tidy_data.pivot(index='Date', columns = 'Ticker', values = 'Log_Return').reset_index()
+
+# plot the adjusted closing price
+plt.plot(log_return['Date'], log_return['SPY'], label = 'S&P 500',linestyle='-', color='cornflowerblue')
+plt.plot(log_return['Date'], log_return['TLT'], label = 'US Treasury',linestyle='-', color='lightgreen')
+plt.plot(log_return['Date'], log_return['GSG'], label = 'Commodities',linestyle='-', color='pink')
+plt.plot(log_return['Date'], log_return['VNQ'], label = 'Real Estate',linestyle='-', color='orange')
+
+plt.title("Log return over Time")
+plt.legend()
+plt.show()
+```
+
 ## Convex Optimization
 
-The portfolio will be using the _Markowitz Portfolio Optimization_ to construct a set of portfolios that aim to achieve target expected rates of return while minimizing risk set by the 
+For the convex optimization problem, the log return will be used on the Markowitz Portfolio Optimization where the target return is not defined and the market risks are minimized while ensuring compliance with regulatory capital requirements under the Basel III. Not only that, conditional Value at Risks is a risk measure that show the average of extreme losses that exceed Value at Risk and  will be included in the constraint as well. The data will be split into two time periods, a training period (2020-2023) and a testing period (2024-2025).
 
 ```{python}
-# filter data into training (2020-2023) and testing (2024-2025) periods
-train_period = fin_tidy_data[(fin_tidy_data['Date'] >= '2020-01-01') & (fin_tidy_data['Date'] <= '2023-12-31')]
-test_period = fin_tidy_data[(fin_tidy_data['Date'] > '2023-12-31')]
+# split training and testing data
+train_period = problem_data[(problem_data['Date'] >= '2020-01-01') & (problem_data['Date'] <= '2023-12-31')]
+test_period = problem_data[(problem_data['Date'] > '2023-12-31')]
 
-# convert the data with the log return
-train_data = train_period.pivot(index='Date', columns='Ticker', values='Log_Return')
-test_data = test_period.pivot(index='Date', columns='Ticker', values='Log_Return')
-
-train_data
-```
-
-```{python}
-# calculate the annual mean and covariance matrix
-mu = np.exp(0.5 * train_data.sum()) - 1
-gamma = train_data.cov().values
+# pivot data
+train_data = train_period.pivot(index='Date', columns='Ticker', values='Log_Return').sort_index()
+test_data = test_period.pivot(index='Date', columns='Ticker', values='Log_Return').sort_index()
 
 # define variables
-r_targets = [1.05, 1.10, 1.20]
-optimal_weights = {}
-portfolio_cum_returns_train = {}
-portfolio_cum_returns_test = {}
+# mu = train_data.mean().values
+mu = np.exp(0.5 * train_data.sum()) - 1
+cov = train_data.cov().values
+cov += 1e-6 * np.eye(len(mu))  # Regularize covariance matrix
 
-for r in r_targets:
-    # define the variable 
-    w = cp.Variable(len(mu))
+X = train_data.values  # shape: (T, n)
+T, n = X.shape
 
-    # define the objective function: 0.5 * w^T * Gamma * w
-    objective = cp.Minimize(0.5 * cp.quad_form(w, gamma))
+# define parameters based on Basel III
+capital_ratio = 0.08
+capital_available = 0.10
+risk_weights = np.ones(n)
 
-    # define the constraints
-    constraints = [cp.sum(w) == 1, w.T @ mu == r, w >= 0]
+# define the CVaR
+alpha = 0.95
+max_cvar = 0.05
 
-    # solve the problem
-    problem = cp.Problem(objective, constraints)
-    problem.solve()
+# define the optimization variables
+w = cp.Variable(n)
+z = cp.Variable(T)
+VaR = cp.Variable()
 
-    # store the optimal weight
-    optimal_weights[r] = w.value
+# calculate the portfolio
+portfolio_returns = X @ w
+losses = - portfolio_returns
 
-    # calculate portfolio returns for training period
-    portfolio_returns_train = train_data.dot(w.value)
-    portfolio_cum_returns_train[r] = np.cumprod(1 + portfolio_returns_train)
+# calculate the conditional Value at Risk
+cvar = VaR + (1 / ((1 - alpha) * T)) * cp.sum(z)
 
-    # calculate portfolio returns for testing period
-    portfolio_returns_test = test_data.dot(w.value)
-    portfolio_cum_returns_test[r] = np.cumprod(1 + portfolio_returns_test)
+# define the objective
+portfolio_variance = cp.quad_form(w, cov)
+objective = cp.Minimize(portfolio_variance)
 
-# plot cumulative returns for training and testing periods
+# define the constraints based on Basel III and CVaR
+constraints = [
+    cp.sum(w) == 1,
+    w >= 0,
+    cp.sum(cp.multiply(w, risk_weights)) * capital_ratio <= capital_available,
+    z >= 0,
+    z >= losses - VaR,
+    cvar <= max_cvar
+]
+
+# solve the problem
+problem = cp.Problem(objective, constraints)
+problem.solve()
+
+# calculate the porfolio return for training and testing data
+weights_optimal = w.value
+portfolio_returns_train = train_data.values @ weights_optimal
+portfolio_returns_test = test_data.values @ weights_optimal
+
+# calculate the cumulative returns
+portfolio_cum_returns_train = np.cumprod(1 + portfolio_returns_train)
+portfolio_cum_returns_test = np.cumprod(1 + portfolio_returns_test)
+
+# plot
 plt.figure(figsize=(12, 6))
-
-for r in r_targets:
-    plt.plot(portfolio_cum_returns_train[r], label=f'Training: r={r}')
-
-plt.title('Cumulative Portfolio Value for Different Target Returns (Training)')
+plt.plot(train_data.index, portfolio_cum_returns_train, label='Training')
+plt.title('Cumulative Portfolio Return (Training Period)')
+plt.xlabel('Date')
+plt.ylabel('Cumulative Return')
+plt.grid(True)
 plt.legend()
-plt.xlabel('Days')
-plt.ylabel('Cumulative Portfolio Value')
 plt.show()
 
 plt.figure(figsize=(12, 6))
-
-for r in r_targets:
-    plt.plot(portfolio_cum_returns_test[r], label=f'Testing: r={r}')
-
-plt.title('Cumulative Portfolio Value for Different Target Returns (Testing)')
+plt.plot(test_data.index, portfolio_cum_returns_test, label='Testing')
+plt.title('Cumulative Portfolio Return (Testing Period)')
+plt.xlabel('Date')
+plt.ylabel('Cumulative Return')
+plt.grid(True)
 plt.legend()
-plt.xlabel('Days')
-plt.ylabel('Cumulative Portfolio Value')
 plt.show()
 ```
 
-After the problem is trained, the target return will be set to 20% and see the optimal portfolio while maintaining the requirement.
-
-```{python}
-# set the target return
-r = 0.20  
-
-# define the lambda range
-lambda_values = np.logspace(-1, 1, 10) 
-
-# define dicts for storing results
-optimal_weights_ridge = {}
-portfolio_cum_returns_train_ridge = {}
-portfolio_cum_returns_test_ridge = {}
-
-
-for lam in lambda_values:
-    # define the variable
-    w = cp.Variable(len(mu))
-
-    # define the objective function: 0.5 * w^T * (Gamma + lambda * I) * w
-    objective = cp.Minimize(0.5 * cp.quad_form(w, cp.psd_wrap(gamma + lam * np.eye(len(mu)))))
-
-    # define the constraints
-    constraints = [cp.sum(w) == 1, w.T @ mu == r, w >= 0]
-
-    # define the optimization problem
-    problem = cp.Problem(objective, constraints)
-
-    # Solve the problem
-    problem.solve()
-
-    # store the optimal weights
-    optimal_weights_ridge[lam] = w.value
-
-    # calculate portfolio returns for training data
-    portfolio_returns_train = train_data.dot(w.value)
-    portfolio_cum_returns_train_ridge[lam] = np.cumprod(1 + portfolio_returns_train)
-
-    # calculate portfolio returns for testing data
-    portfolio_returns_test = test_data.dot(w.value)
-    portfolio_cum_returns_test_ridge[lam] = np.cumprod(1 + portfolio_returns_test)
-
-# plot the lamda training period
-for lam in lambda_values:
-    plt.plot(portfolio_cum_returns_train_ridge[lam], label=f'Training: λ={lam:.2f}')
-
-#plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Training)')
-plt.legend()
-plt.xlabel('Days')
-plt.ylabel('Cumulative Portfolio Value')
-plt.show()
-
-# plot the lamda testing period
-for lam in lambda_values:
-    plt.plot(portfolio_cum_returns_test_ridge[lam], label=f'Testing: λ={lam:.2f}')
-
-plt.title('Cumulative Portfolio Value with Ridge Regularization (λ values - Testing)')
-plt.legend()
-plt.xlabel('Days')
-plt.ylabel('Cumulative Portfolio Value')
-plt.show()
-```
-
+### Observation and Insights
